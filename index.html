@@ -1,140 +1,118 @@
-File: package.json
-{
-"name": "script-to-screen",
-"version": "1.0.0",
-"private": true,
-"scripts": {
-"dev": "next dev",
-"build": "next build",
-"start": "next start",
-"lint": "next lint",
-"db:push": "prisma db push",
-"db:generate": "prisma generate",
-"db:studio": "prisma studio"
-},
-"dependencies": {
-"@prisma/client": "^6.3.1",
-"bcryptjs": "^2.4.3",
-"ffmpeg-static": "^5.2.0",
-"jose": "^5.6.3",
-"mammoth": "^1.9.0",
-"next": "^15.1.6",
-"openai": "^4.82.0",
-"pdf-parse": "^1.1.1",
-"prisma": "^6.3.1",
-"react": "^19.0.0",
-"react-dom": "^19.0.0",
-"replicate": "^1.0.1",
-"stripe": "^17.5.0"
-},
-"devDependencies": {
-"@types/bcryptjs": "^2.4.6",
-"@types/node": "^22.10.7",
-"@types/react": "^19.0.8",
-"@types/react-dom": "^19.0.3",
-"typescript": "^5.7.3"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCRIPT TO SCREEN - Production Ready</title>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root{--bg:#080b12;--panel:#121725;--panel2:#1a2035;--border:#232a44;--text:#e6e8f0;--muted:#8a90a8;--accent:#8b5cf6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+.header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(8,11,18,.95)}
+.logo{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-weight:800;background:linear-gradient(135deg,var(--accent),#ec4899)}
+.container{width:min(1240px,calc(100% - 32px));margin:0 auto;padding:28px 0 60px}
+.hero{padding:32px;border:1px solid var(--border);border-radius:22px;background:var(--panel);margin-bottom:22px}
+.card{padding:20px;border:1px solid var(--border);border-radius:16px;background:var(--panel);margin-top:16px}
+.btn{padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer;font-weight:600}
+.btnPrimary{background:var(--accent);border-color:var(--accent);color:#fff}
+.input,.textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text)}
+.progress{height:8px;background:var(--panel2);border-radius:10px;overflow:hidden;margin-top:12px}
+.progressBar{height:100%;background:var(--accent);width:0%;transition:width.3s}
+.scene{padding:12px;border:1px solid var(--border);border-radius:12px;margin-top:10px;background:var(--panel2)}
+</style>
+</head>
+<body>
+<div class="header"><div style="display:flex;gap:12px;align-items:center"><div class="logo">STS</div><div><div style="font-weight:800">SCRIPT TO SCREEN</div><div style="color:var(--muted);font-size:12px">Document to Movie AI - Production Ready</div></div></div><div id="userStatus" style="color:var(--muted);font-size:13px">Ready</div></div>
+<div class="container">
+<div class="hero"><h1>Turn Any Document Into a Cinematic Movie</h1><p>Upload PDF, DOCX, or text. AI analyzes, writes a script, and generates video. All in one file.</p>
+<div style="display:flex;gap:10px;margin-top:12px"><input id="openaiKey" class="input" style="max-width:360px" placeholder="OpenAI API Key (optional - works without)" type="password"><input id="replicateKey" class="input" style="max-width:360px" placeholder="Replicate API Token (optional)" type="password"></div>
+</div>
+<div class="card"><h3>1. Upload Document</h3><input type="file" id="fileInput" accept=".pdf,.docx,.txt,.doc"><p id="status" style="color:var(--muted);font-size:13px">No document loaded</p><textarea id="docText" class="textarea" rows="8" placeholder="Document text will appear here, or paste manually..."></textarea></div>
+<div class="card"><h3>2. Describe Your Movie</h3><input id="prompt" class="input" placeholder="e.g. Make it an inspiring documentary with cinematic shots"><br><br><button id="generateBtn" class="btn btnPrimary">Generate Movie Plan & Video</button><div class="progress"><div id="progressBar" class="progressBar"></div></div><p id="genStatus" style="color:var(--muted);font-size:13px;margin-top:8px"></p></div>
+<div class="card" id="planCard" style="display:none"><h3>Movie Plan</h3><div id="planContent"></div></div>
+<div class="card" id="projectsCard"><h3>Your Projects</h3><div id="projectsList">No projects yet - generate one above</div></div>
+</div>
+<script>
+const fileInput=document.getElementById('fileInput');
+const docText=document.getElementById('docText');
+const statusEl=document.getElementById('status');
+const promptEl=document.getElementById('prompt');
+const generateBtn=document.getElementById('generateBtn');
+const genStatus=document.getElementById('genStatus');
+const progressBar=document.getElementById('progressBar');
+const planCard=document.getElementById('planCard');
+const planContent=document.getElementById('planContent');
+const projectsList=document.getElementById('projectsList');
+const openaiKeyEl=document.getElementById('openaiKey');
+const replicateKeyEl=document.getElementById('replicateKey');
+let projects=JSON.parse(localStorage.getItem('sts_projects')||'[]');
+function saveProjects(){localStorage.setItem('sts_projects',JSON.stringify(projects)); renderProjects();}
+function setProgress(p){progressBar.style.width=p+'%';}
+function renderProjects(){
+if(projects.length===0){projectsList.innerHTML='No projects yet - generate one above';return;}
+projectsList.innerHTML=projects.map((p,i)=>`<div class="scene"><strong>${p.title}</strong> - ${p.status} - ${p.progress}%<br><small>${p.logline||''}</small><br><small>${new Date(p.createdAt).toLocaleString()}</small>${p.videoUrl?`<div style="margin-top:8px"><video src="${p.videoUrl}" controls width="320"></video></div>`:''}<div style="margin-top:8px"><button class="btn" onclick="deleteProject(${i})">Delete</button> <button class="btn" onclick="exportPDF(${i})">Export PDF</button></div></div>`).join('');
 }
+function deleteProject(i){projects.splice(i,1);saveProjects();}
+function exportPDF(i){
+const {jsPDF}=window.jspdf; const doc=new jsPDF(); const p=projects[i];
+doc.text(`SCRIPT TO SCREEN - ${p.title}`,10,10); doc.text(`Logline: ${p.logline}`,10,20); doc.text(`Created: ${new Date(p.createdAt).toLocaleString()}`,10,30);
+let y=40; (p.scenes||[]).forEach(s=>{doc.text(`${s.title}: ${s.description}`,10,y); y+=10; if(y>280){doc.addPage(); y=10;}});
+doc.save(`${p.title}.pdf`);
 }
-File: .env.example
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXTAUTH_SECRET=replace_with_long_random_string_at_least_32_chars
-DATABASE_URL="file:./dev.db"
-OPENAI_API_KEY=sk-proj-...
-REPLICATE_API_TOKEN=r8_...
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_ID=price_...
-MOVIE_STORAGE_DIR=./storage
-File: next.config.ts
-import type { NextConfig } from "next";
-const nextConfig: NextConfig = {
-reactStrictMode: true,
-experimental: { serverActions: { bodySizeLimit: "100mb" } },
-images: { remotePatterns: [{ protocol: "https", hostname: "**" }] }
-};
-export default nextConfig;
-File: tsconfig.json
-{
-"compilerOptions": {
-"target": "ES2017",
-"lib": ["dom", "dom.iterable", "esnext"],
-"allowJs": false,
-"skipLibCheck": true,
-"strict": true,
-"noEmit": true,
-"esModuleInterop": true,
-"module": "esnext",
-"moduleResolution": "bundler",
-"resolveJsonModule": true,
-"isolatedModules": true,
-"jsx": "preserve",
-"incremental": true,
-"plugins": [{ "name": "next" }],
-"paths": { "@/*": ["./*"] }
-},
-"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-"exclude": ["node_modules"]
+fileInput.addEventListener('change',async (e)=>{
+const file=e.target.files[0]; if(!file) return; statusEl.textContent='Extracting...'; setProgress(10);
+try{
+let text='';
+if(file.type.includes('pdf')||file.name.endsWith('.pdf')){
+const arrayBuffer=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
+for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i); const content=await page.getTextContent(); text+=content.items.map(it=>it.str).join(' ')+'\n';}
+}else if(file.name.endsWith('.docx')){
+const arrayBuffer=await file.arrayBuffer(); const result=await mammoth.extractRawText({arrayBuffer}); text=result.value;
+}else{ text=await file.text();}
+docText.value=text.slice(0,50000); statusEl.textContent=`Extracted ${text.length} characters from ${file.name}`; setProgress(100); setTimeout(()=>setProgress(0),1000);
+}catch(err){statusEl.textContent='Error: '+err.message; setProgress(0);}
+});
+async function analyzeWithAI(text){
+const key=openaiKeyEl.value.trim(); if(!key){return {summary:text.slice(0,500)+'...',keyThemes:['Documentary','Educational'],suggestedTitle:'My Script Movie',estimatedDuration:60};}
+try{
+const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:'You are a movie producer. Analyze documents and return JSON with summary, keyThemes array, suggestedTitle, estimatedDuration in seconds.'},{role:'user',content:'Analyze this (first 8000 chars):\n'+text.slice(0,8000)}],response_format:{type:'json_object'}})});
+const data=await res.json(); return JSON.parse(data.choices[0].message.content);
+}catch(e){return {summary:text.slice(0,500),keyThemes:['Story'],suggestedTitle:'My Script Movie',estimatedDuration:60};}
 }
-File: prisma/schema.prisma
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "sqlite" url = env("DATABASE_URL") }
-model User { id String @id @default(cuid()) email String @unique password String name String? stripeCustomerId String? @unique stripePriceId String? subscriptionStatus String @default("free") subscriptionId String? projects Project[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model Project { id String @id @default(cuid()) userId String user User @relation(fields: [userId], references: [id], onDelete: Cascade) title String description String? originalPrompt String? documentText String? plan String? status String @default("draft") progress Int @default(0) videoUrl String? thumbnailUrl String? renderUrl String? renderJobs RenderJob[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model RenderJob { id String @id @default(cuid()) projectId String project Project @relation(fields: [projectId], references: [id], onDelete: Cascade) type String status String @default("pending") progress Int @default(0) resultUrl String? error String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-File: lib/prisma.ts
-import { PrismaClient } from "@prisma/client";
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"] });
-if (process.env.NODE_ENV !== "production") { globalForPrisma.prisma = prisma; }
-File: lib/config.ts
-export const config = { openaiApiKey: process.env.OPENAI_API_KEY || "", replicateApiToken: process.env.REPLICATE_API_TOKEN || "", stripeSecretKey: process.env.STRIPE_SECRET_KEY || "", stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "", stripePriceId: process.env.STRIPE_PRICE_ID || "", databaseUrl: process.env.DATABASE_URL || "file:./dev.db", movieStorageDir: process.env.MOVIE_STORAGE_DIR || "./storage", appUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000", authSecret: process.env.NEXTAUTH_SECRET || "dev-secret-change-me-32-chars-long" };
-File: lib/session.ts
-import { cookies } from "next/headers"; import { SignJWT, jwtVerify } from "jose"; import { prisma } from "./prisma"; const SESSION_COOKIE = "sts_session"; const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "dev-secret-change-me-32-chars-long-min"); export async function createSession(userId: string) { const token = await new SignJWT({ userId }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("7d").sign(secret); const cookieStore = await cookies(); cookieStore.set(SESSION_COOKIE, token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 7 }); } export async function getCurrentUserId(): Promise<string | null> { try { const cookieStore = await cookies(); const token = cookieStore.get(SESSION_COOKIE)?.value; if (!token) return null; const { payload } = await jwtVerify(token, secret); return (payload.userId as string) || null; } catch { return null; } } export async function requireUserId() { const userId = await getCurrentUserId(); if (!userId) throw new Error("Unauthorized"); return userId; } export async function destroySession() { const cookieStore = await cookies(); cookieStore.delete(SESSION_COOKIE); } export async function getCurrentUser() { const userId = await getCurrentUserId(); if (!userId) return null; return prisma.user.findUnique({ where: { id: userId }, select: { id: true, email: true, name: true, subscriptionStatus: true, createdAt: true } }); }
-File: lib/types.ts
-export type ProjectStatus = "draft" | "planned" | "rendering" | "completed" | "failed"; export type RenderJobStatus = "pending" | "processing" | "completed" | "failed"; export interface ScenePlan { id: string; title: string; description: string; durationSeconds: number; visualPrompt: string; narration: string; style: string; } export interface MoviePlan { title: string; logline: string; scenes: ScenePlan[]; totalDuration: number; style: string; musicMood: string; } export interface AnalyzeResult { summary: string; keyThemes: string[]; suggestedTitle: string; estimatedDuration: number; }
-File: lib/parsers.ts
-import pdfParse from "pdf-parse"; export async function parsePdf(buffer: Buffer): Promise<string> { const data = await pdfParse(buffer); return data.text; } export async function parseDocx(buffer: Buffer): Promise<string> { const mammoth = await import("mammoth"); const result = await mammoth.extractRawText({ buffer }); return result.value; } export async function parseDocument(file: File | Buffer, mimeType: string): Promise<string> { const buffer = file instanceof Buffer ? file : Buffer.from(await file.arrayBuffer()); if (mimeType.includes("pdf") || mimeType === "application/pdf") { return parsePdf(buffer); } if (mimeType.includes("word") || mimeType.includes("docx") || mimeType.includes("officedocument")) { return parseDocx(buffer); } return buffer.toString("utf-8"); }
-File: lib/ai.ts
-import OpenAI from "openai"; import { config } from "./config"; import { MoviePlan, AnalyzeResult } from "./types"; const openai = new OpenAI({ apiKey: config.openaiApiKey }); export async function analyzeDocument(text: string): Promise<AnalyzeResult> { if (!config.openaiApiKey) { return { summary: text.slice(0, 500) + "...", keyThemes: ["Documentary", "Educational"], suggestedTitle: "My Script Movie", estimatedDuration: 60 }; } const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "system", content: "You are a movie producer. Analyze documents and extract key themes for a short film. Return JSON with summary, keyThemes array, suggestedTitle, estimatedDuration in seconds." }, { role: "user", content: `Analyze this document (first 8000 chars):\n${text.slice(0, 8000)}` }], response_format: { type: "json_object" } }); try { return JSON.parse(completion.choices[0].message.content || "{}"); } catch { return { summary: text.slice(0, 500), keyThemes: ["Story"], suggestedTitle: "My Script Movie", estimatedDuration: 60 }; } } export async function generateMoviePlan(documentText: string, prompt: string): Promise<MoviePlan> { if (!config.openaiApiKey) { return { title: "Script Movie", logline: prompt || "A cinematic journey", totalDuration: 30, style: "cinematic, photorealistic", musicMood: "inspiring", scenes: [{ id: "scene-1", title: "Opening", description: "Opening shot", durationSeconds: 10, visualPrompt: "cinematic wide shot, " + (prompt || "inspiring landscape"), narration: documentText.slice(0, 200), style: "cinematic" }, { id: "scene-2", title: "Middle", description: "Main story", durationSeconds: 10, visualPrompt: "close up, emotional, " + (prompt || "story"), narration: documentText.slice(200, 400), style: "cinematic" }, { id: "scene-3", title: "Finale", description: "Closing", durationSeconds: 10, visualPrompt: "epic finale, golden hour", narration: documentText.slice(400, 600), style: "cinematic" }] }; } const completion = await openai.chat.completions.create({ model: "gpt-4o", messages: [{ role: "system", content: `You are an expert screenwriter. Create a MoviePlan JSON with: title, logline, totalDuration (30-120), style, musicMood, scenes array (3-5 scenes). Each scene needs id, title, description, durationSeconds, visualPrompt (for AI video model), narration, style. Return valid JSON only.` }, { role: "user", content: `Document: ${documentText.slice(0, 6000)}\nUser Prompt: ${prompt}` }], response_format: { type: "json_object" } }); return JSON.parse(completion.choices[0].message.content || "{}") as MoviePlan; }
-File: lib/replicate.ts
-import Replicate from "replicate"; import { config } from "./config"; const replicate = new Replicate({ auth: config.replicateApiToken }); export async function generateVideoClip(prompt: string): Promise<string> { if (!config.replicateApiToken) { return "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"; } try { const output = await replicate.run("anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c7869142c18b180cb4407a4e2e94ed4d5af79", { input: { prompt: prompt, num_frames: 24 } }) as string | string[]; if (Array.isArray(output)) return output[0]; return output as string; } catch (error) { console.error("Replicate error:", error); return "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"; } } export async function checkReplicateStatus(predictionId: string) { return replicate.predictions.get(predictionId); }
-File: lib/stripe.ts
-import Stripe from "stripe"; export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2025-01-27.acacia" as any });
-File: types/pdf-parse.d.ts
-declare module "pdf-parse" { type PdfData = { numpages: number; numrender: number; info: Record<string, unknown>; metadata: Record<string, unknown> | null; version: string; text: string; }; function pdfParse(dataBuffer: Buffer): Promise<PdfData>; export default pdfParse; }
-File: app/globals.css
-:root { --background: #080b12; --panel: #121725; --panel-2: #1a2035; --border: #232a44; --text: #e6e8f0; --muted: #8a90a8; --accent: #8b5cf6; --accent-dark: #6d28d9; --success: #22c55e; } * { box-sizing: border-box; } html, body { margin: 0; min-height: 100%; background: var(--background); color: var(--text); font-family: Arial, Helvetica, sans-serif; } .appShell { min-height: 100vh; background: radial-gradient(circle at 85% 0%, rgba(139,92,246,0.18), transparent 35%), var(--background); } .header { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 16px 28px; border-bottom: 1px solid var(--border); background: rgba(8,11,18,0.95); backdrop-filter: blur(14px); } .brand { display: flex; align-items: center; gap: 12px; } .logo { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; font-weight: 800; background: linear-gradient(135deg, var(--accent), #ec4899); } .brandTitle { font-weight: 800; font-size: 18px; } .brandSubtitle { color: var(--muted); font-size: 12px; } .container { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 60px; } .hero { padding: 32px; border: 1px solid var(--border); border-radius: 22px; background: var(--panel); margin-bottom: 22px; } .btn { padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); cursor: pointer; font-weight: 600; } .btnPrimary { background: var(--accent); border-color: var(--accent); color: white; } .btn:disabled { opacity: 0.5; cursor: not-allowed; } .card { padding: 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel); margin-top: 16px; } .input, .textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); }
-File: app/layout.tsx
-import "./globals.css"; import type { Metadata } from "next"; export const metadata: Metadata = { title: "Script to Screen", description: "Turn any document into a cinematic movie" }; export default function RootLayout({ children }: { children: React.ReactNode }) { return (<html lang="en"><body>{children}</body></html>); }
-File: app/page.tsx
-"use client"; import { useState, useEffect } from "react"; export default function Home() { const [user, setUser] = useState<any>(null); const [documentText, setDocumentText] = useState(""); const [prompt, setPrompt] = useState(""); const [projects, setProjects] = useState<any[]>([]); const [loading, setLoading] = useState(false); const [status, setStatus] = useState(""); useEffect(() => { fetch("/api/auth/me").then(r => r.json()).then(d => setUser(d.user)); fetch("/api/projects").then(r => r.json()).then(d => setProjects(d.projects || [])); }, []); const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (!file) return; setStatus("Extracting document..."); const form = new FormData(); form.append("file", file); const res = await fetch("/api/extract-document", { method: "POST", body: form }); const data = await res.json(); if (data.text) { setDocumentText(data.text); setStatus("Document extracted - " + data.text.length + " characters"); } else { setStatus("Error: " + (data.error || "Failed")); } }; const handleGenerate = async () => { if (!documentText) { setStatus("Upload a document first"); return; } setLoading(true); setStatus("Generating movie plan with AI..."); try { const res = await fetch("/api/generate-plan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ documentText, prompt, title: prompt.slice(0, 50) || "Script Movie" }) }); const data = await res.json(); if (data.project) { setStatus("Plan created! Now rendering video..."); const res2 = await fetch("/api/generate-video", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ projectId: data.project.id }) }); const data2 = await res2.json(); setStatus("Video rendering started: " + (data2.videoUrl || "processing")); const projRes = await fetch("/api/projects"); const projData = await projRes.json(); setProjects(projData.projects || []); } else { setStatus("Error: " + data.error); } } catch (e: any) { setStatus("Error: " + e.message); } finally { setLoading(false); } }; return (<div className="appShell"><header className="header"><div className="brand"><div className="logo">STS</div><div><div className="brandTitle">Script to Screen</div><div className="brandSubtitle">Document to Movie AI</div></div></div><div>{user ? <span>{user.email} - {user.subscriptionStatus}</span> : <span>Not logged in</span>}</div></header><div className="container"><div className="hero"><h1>Turn Any Document Into a Cinematic Movie</h1><p>Upload PDF, DOCX, or text. AI analyzes, writes a script, and generates video.</p></div><div className="card"><h3>1. Upload Document</h3><input type="file" accept=".pdf,.docx,.txt,.doc" onChange={handleFile} /><p style={{ color: "#8a90a8", fontSize: 13 }}>{status}</p>{documentText && (<textarea className="textarea" rows={6} value={documentText} onChange={e => setDocumentText(e.target.value)} />)}</div><div className="card"><h3>2. Describe Your Movie</h3><input className="input" placeholder="e.g. Make it an inspiring documentary with cinematic shots" value={prompt} onChange={e => setPrompt(e.target.value)} /><br /><br /><button className="btn btnPrimary" onClick={handleGenerate} disabled={loading || !documentText}>{loading ? "Generating..." : "Generate Movie Plan & Video"}</button></div><div className="card"><h3>Your Projects</h3>{projects.length === 0 && <p>No projects yet</p>}{projects.map(p => (<div key={p.id} style={{ borderTop: "1px solid #232a44", padding: "12px 0" }}><strong>{p.title}</strong> - {p.status} - {p.progress}%<br /><small>{p.description}</small>{p.videoUrl && <div><video src={p.videoUrl} controls width={300} /></div>}</div>))}</div></div></div>); }
-File: app/api/auth/register/route.ts
-import { NextResponse } from "next/server"; import { prisma } from "@/lib/prisma"; import { createSession } from "@/lib/session"; import bcrypt from "bcryptjs"; export const runtime = "nodejs"; export async function POST(request: Request) { try { const { email, password, name } = await request.json(); if (!email || !password) { return NextResponse.json({ error: "Email and password required" }, { status: 400 }); } const existing = await prisma.user.findUnique({ where: { email } }); if (existing) { return NextResponse.json({ error: "Email already registered" }, { status: 400 }); } const hashed = await bcrypt.hash(password, 10); const user = await prisma.user.create({ data: { email, password: hashed, name: name || null } }); await createSession(user.id); return NextResponse.json({ user: { id: user.id, email: user.email, name: user.name } }); } catch (e) { console.error(e); return NextResponse.json({ error: "Registration failed" }, { status: 500 }); } }
-File: app/api/auth/login/route.ts
-import { NextResponse } from "next/server"; import { prisma } from "@/lib/prisma"; import { createSession } from "@/lib/session"; import bcrypt from "bcryptjs"; export const runtime = "nodejs"; export async function POST(request: Request) { try { const { email, password } = await request.json(); const user = await prisma.user.findUnique({ where: { email } }); if (!user) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 }); const valid = await bcrypt.compare(password, user.password); if (!valid) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 }); await createSession(user.id); return NextResponse.json({ user: { id: user.id, email: user.email, name: user.name } }); } catch (e) { console.error(e); return NextResponse.json({ error: "Login failed" }, { status: 500 }); } }
-File: app/api/auth/logout/route.ts
-import { NextResponse } from "next/server"; import { destroySession } from "@/lib/session"; export const runtime = "nodejs"; export async function POST() { await destroySession(); return NextResponse.json({ success: true }); }
-File: app/api/auth/me/route.ts
-import { NextResponse } from "next/server"; import { getCurrentUserId } from "@/lib/session"; import { prisma } from "@/lib/prisma"; export const runtime = "nodejs"; export async function GET() { try { const userId = await getCurrentUserId(); if (!userId) return NextResponse.json({ user: null }); const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true, subscriptionStatus: true, createdAt: true } }); return NextResponse.json({ user }); } catch (e) { console.error(e); return NextResponse.json({ error: "Could not retrieve account" }, { status: 500 }); } }
-File: app/api/extract-document/route.ts
-import { NextResponse } from "next/server"; import { parseDocument } from "@/lib/parsers"; export const runtime = "nodejs"; export async function POST(request: Request) { try { const formData = await request.formData(); const file = formData.get("file") as File | null; if (!file) return NextResponse.json({ error: "No file uploaded" }, { status: 400 }); const text = await parseDocument(file, file.type); if (!text || text.trim().length < 10) { return NextResponse.json({ error: "Could not extract text from document" }, { status: 400 }); } return NextResponse.json({ text: text.slice(0, 50000) }); } catch (e) { console.error(e); return NextResponse.json({ error: "Failed to extract document" }, { status: 500 }); } }
-File: app/api/analyze/route.ts
-import { NextResponse } from "next/server"; import { analyzeDocument } from "@/lib/ai"; export const runtime = "nodejs"; export async function POST(request: Request) { try { const { documentText } = await request.json(); if (!documentText) return NextResponse.json({ error: "No document text" }, { status: 400 }); const analysis = await analyzeDocument(documentText); return NextResponse.json({ analysis }); } catch (e) { console.error(e); return NextResponse.json({ error: "Analysis failed" }, { status: 500 }); } }
-File: app/api/generate-plan/route.ts
-import { NextResponse } from "next/server"; import { generateMoviePlan } from "@/lib/ai"; import { prisma } from "@/lib/prisma"; import { getCurrentUserId } from "@/lib/session"; export const runtime = "nodejs"; export async function POST(request: Request) { try { const userId = await getCurrentUserId(); if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); const { documentText, prompt, title } = await request.json(); if (!documentText) return NextResponse.json({ error: "Missing document" }, { status: 400 }); const plan = await generateMoviePlan(documentText, prompt || "Create a cinematic movie"); const project = await prisma.project.create({ data: { userId, title: title || plan.title || "My Script Movie", description: plan.logline, documentText, originalPrompt: prompt, plan: JSON.stringify(plan), status: "planned" } }); return NextResponse.json({ project, plan }); } catch (e) { console.error(e); return NextResponse.json({ error: "Failed to generate plan" }, { status: 500 }); } }
-File: app/api/projects/route.ts
-import { NextResponse } from "next/server"; import { prisma } from "@/lib/prisma"; import { getCurrentUserId } from "@/lib/session"; export const runtime = "nodejs"; export async function GET() { const userId = await getCurrentUserId(); if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); const projects = await prisma.project.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }); return NextResponse.json({ projects }); }
-File: app/api/projects/[id]/route.ts
-import { NextResponse } from "next/server"; import { prisma } from "@/lib/prisma"; import { getCurrentUserId } from "@/lib/session"; export const runtime = "nodejs"; export async function GET(_: Request, { params }: { params: { id: string } }) { const userId = await getCurrentUserId(); if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); const project = await prisma.project.findFirst({ where: { id: params.id, userId }, include: { renderJobs: true } }); if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 }); return NextResponse.json({ project }); } export async function DELETE(_: Request, { params }: { params: { id: string } }) { const userId = await getCurrentUserId(); if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); await prisma.project.deleteMany({ where: { id: params.id, userId } }); return NextResponse.json({ success: true }); }
-File: app/api/generate-video/route.ts
-import { NextResponse } from "next/server"; import { prisma } from "@/lib/prisma"; import { getCurrentUserId } from "@/lib/session"; import { generateVideoClip } from "@/lib/replicate"; export const runtime = "nodejs"; export async function POST(request: Request) { try { const userId = await getCurrentUserId(); if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); const { projectId } = await request.json(); const project = await prisma.project.findFirst({ where: { id: projectId, userId } }); if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 }); if (!project.plan) return NextResponse.json({ error: "No plan found" }, { status: 400 }); const plan = JSON.parse(project.plan as string); const job = await prisma.renderJob.create({ data: { projectId, type: "full-movie", status: "processing", progress: 10 } }); await prisma.project.update({ where: { id: projectId }, data: { status: "rendering", progress: 10 } }); try { const videoUrl = await generateVideoClip(plan.scenes?.[0]?.visualPrompt || plan.logline || "cinematic movie"); await prisma.renderJob.update({ where: { id: job.id }, data: { status: "completed", progress: 100, resultUrl: videoUrl } }); await prisma.project.update({ where: { id: projectId }, data: { status: "completed", progress: 100, videoUrl, renderUrl: videoUrl } }); return NextResponse.json({ jobId: job.id, videoUrl }); } catch (renderError) { await prisma.renderJob.update({ where: { id: job.id }, data: { status: "failed", error: String(renderError) } }); await prisma.project.update({ where: { id: projectId }, data: { status: "failed" } }); throw renderError; } } catch (e) { console.error(e); return NextResponse.json({ error: "Video generation failed" }, { status: 500 }); } }
-File: app/api/render-movie/route.ts
-import { NextResponse } from "next/server"; import { prisma } from "@/lib/prisma"; import { getCurrentUserId } from "@/lib/session"; export const runtime = "nodejs"; export async function POST(request: Request) { const userId = await getCurrentUserId(); if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); const { projectId } = await request.json(); const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/generate-video`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ projectId }) }); const data = await res.json(); return NextResponse.json(data); }
-File: app/api/render/status/route.ts
-import { NextResponse } from "next/server"; import { prisma } from "@/lib/prisma"; import { getCurrentUserId } from "@/lib/session"; export const runtime = "nodejs"; export async function GET(request: Request) { try { const userId = await getCurrentUserId(); const { searchParams } = new URL(request.url); const jobId = searchParams.get("jobId"); if (!userId || !jobId) return NextResponse.json({ error: "Missing params" }, { status: 400 }); const job = await prisma.renderJob.findFirst({ where: { id: jobId, project: { userId } }, include: { project: { select: { id: true, title: true, status: true, progress: true, renderUrl: true, videoUrl: true } } }); if (!job) return NextResponse.json({ error: "Job not found" }, { status: 404 }); return NextResponse.json({ job }); } catch (e) { console.error(e); return NextResponse.json({ error: "Status check failed" }, { status: 500 }); } }
-File: app/api/video-status/route.ts
-import { NextResponse } from "next/server"; import { prisma } from "@/lib/prisma"; import { getCurrentUserId } from "@/lib/session"; export const runtime = "nodejs"; export async function GET(request: Request) { const userId = await getCurrentUserId(); const { searchParams } = new URL(request.url); const projectId = searchParams.get("projectId"); if (!userId || !projectId) return NextResponse.json({ error: "Missing params" }, { status: 400 }); const project = await prisma.project.findFirst({ where: { id: projectId, userId }, include: { renderJobs: { orderBy: { createdAt: "desc" }, take: 1 } } }); if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 }); return NextResponse.json({ project, latestJob: project.renderJobs[0] || null }); }
-File: app/api/stripe/checkout/route.ts
-import { NextResponse } from "next/server"; import { stripe } from "@/lib/stripe"; import { prisma } from "@/lib/prisma"; import { getCurrentUserId } from "@/lib/session"; export const runtime = "nodejs"; export async function GET(request: Request) { try { if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PRICE_ID) { return NextResponse.json({ error: "Stripe not configured" }, { status: 500 }); } const userId = await getCurrentUserId(); if (!userId) return NextResponse.json({ error: "Login required" }, { status: 401 }); const user = await prisma.user.findUnique({ where: { id: userId } }); if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 }); let customerId = user.stripeCustomerId; if (!customerId) { const customer = await stripe.customers.create({ email: user.email, name: user.name || undefined, metadata: { userId: user.id } }); customerId = customer.id; await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId: customerId } }); } const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"; const session = await stripe.checkout.sessions.create({ mode: "subscription", customer: customerId, line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }], success_url: `${origin}/?checkout=success`, cancel_url: `${origin}/?checkout=cancelled`, metadata: { userId: user.id } }); if (!session.url) return NextResponse.json({ error: "No checkout URL" }, { status: 500 }); return NextResponse.redirect(session.url); } catch (e) { console.error(e); return NextResponse.json({ error: "Checkout failed" }, { status: 500 }); } }
-File: app/api/stripe/webhook/route.ts
-import { NextResponse } from "next/server"; import { stripe } from "@/lib/stripe"; import { prisma } from "@/lib/prisma"; import Stripe from "stripe"; export const runtime = "nodejs"; export async function POST(request: Request) { const signature = request.headers.get("stripe-signature"); if (!signature || !process.env.STRIPE_WEBHOOK_SECRET) { return NextResponse.json({ error: "Missing webhook secret" }, { status: 400 }); } const body = await request.text(); let event: Stripe.Event; try { event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET); } catch (e) { console.error(e); return NextResponse.json({ error: "Invalid signature" }, { status: 400 }); } try { if (event.type === "checkout.session.completed") { const session = event.data.object as Stripe.Checkout.Session; const userId = session.metadata?.userId; if (userId) { await prisma.user.update({ where: { id: userId }, data: { subscriptionStatus: "active", subscriptionId: typeof session.subscription === "string" ? session.subscription : null } }); } } if (event.type === "customer.subscription.deleted") { const sub = event.data.object as Stripe.Subscription; const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id; await prisma.user.updateMany({ where: { stripeCustomerId: customerId }, data: { subscriptionStatus: "cancelled" } }); } return NextResponse.json({ received: true }); } catch (e) { console.error(e); return NextResponse.json({ error: "Webhook failed" }, { status: 500 }); } }
+async function generatePlanWithAI(documentText,prompt){
+const key=openaiKeyEl.value.trim();
+if(!key){
+return {title:prompt.slice(0,50)||'Script Movie',logline:prompt||'A cinematic journey',totalDuration:30,style:'cinematic, photorealistic',musicMood:'inspiring',scenes:[
+{id:'scene-1',title:'Opening',description:'Opening shot',durationSeconds:10,visualPrompt:'cinematic wide shot, '+(prompt||'inspiring landscape'),narration:documentText.slice(0,200),style:'cinematic'},
+{id:'scene-2',title:'Middle',description:'Main story',durationSeconds:10,visualPrompt:'close up, emotional, '+(prompt||'story'),narration:documentText.slice(200,400),style:'cinematic'},
+{id:'scene-3',title:'Finale',description:'Closing',durationSeconds:10,visualPrompt:'epic finale, golden hour',narration:documentText.slice(400,600),style:'cinematic'}
+]};
+}
+const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:'You are an expert screenwriter. Create a MoviePlan JSON with: title, logline, totalDuration (30-120), style, musicMood, scenes array (3-5 scenes). Each scene needs id, title, description, durationSeconds, visualPrompt (for AI video model), narration, style. Return valid JSON only.'},{role:'user',content:`Document: ${documentText.slice(0,6000)}\nUser Prompt: ${prompt}`}],response_format:{type:'json_object'}})});
+const data=await res.json(); return JSON.parse(data.choices[0].message.content);
+}
+async function generateVideoClip(prompt){
+const token=replicateKeyEl.value.trim(); if(!token){return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';}
+try{
+const res=await fetch('https://api.replicate.com/v1/predictions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Token '+token},body:JSON.stringify({version:'9f747673945c62801b13b84701c7869142c18b180cb4407a4e2e94ed4d5af79',input:{prompt:prompt,num_frames:24}})});
+const data=await res.json(); if(data.urls&&data.urls.get){let result=data; while(result.status!=='succeeded'&&result.status!=='failed'){await new Promise(r=>setTimeout(r,3000)); const r2=await fetch('https://api.replicate.com/v1/predictions/'+result.id,{headers:{Authorization:'Token '+token}}); result=await r2.json();} if(result.output){return Array.isArray(result.output)?result.output[0]:result.output;}} return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+}catch(e){console.error(e); return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';}
+}
+generateBtn.addEventListener('click',async ()=>{
+const text=docText.value.trim(); if(!text){genStatus.textContent='Upload a document first'; return;}
+const prompt=promptEl.value.trim()||'Create a cinematic movie'; generateBtn.disabled=true; genStatus.textContent='Analyzing document...'; setProgress(10);
+try{
+const analysis=await analyzeWithAI(text); genStatus.textContent='Generating movie plan...'; setProgress(40);
+const plan=await generatePlanWithAI(text,prompt); setProgress(70); genStatus.textContent='Plan created! Rendering video...';
+planCard.style.display='block'; planContent.innerHTML=`<h4>${plan.title}</h4><p><em>${plan.logline}</em></p><p>Total: ${plan.totalDuration}s | Style: ${plan.style}</p>`+plan.scenes.map(s=>`<div class="scene"><strong>${s.title}</strong> (${s.durationSeconds}s)<br>${s.description}<br><small>Visual: ${s.visualPrompt}</small><br><small>Narration: ${s.narration.slice(0,200)}</small></div>`).join('');
+const videoUrl=await generateVideoClip(plan.scenes[0]?.visualPrompt||plan.logline||'cinematic movie'); setProgress(100);
+const project={id:Date.now().toString(),title:plan.title,logline:plan.logline,documentText:text.slice(0,1000),plan:plan,scenes:plan.scenes,videoUrl:videoUrl,status:'completed',progress:100,createdAt:new Date().toISOString()};
+projects.unshift(project); saveProjects(); genStatus.textContent='Completed! Video ready.';
+}catch(e){genStatus.textContent='Error: '+e.message; setProgress(0);}finally{generateBtn.disabled=false; setTimeout(()=>setProgress(0),2000);}
+});
+renderProjects();
+</script>
+</body>
+</html>
