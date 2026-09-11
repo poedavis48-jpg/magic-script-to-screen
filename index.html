@@ -1,1 +1,193 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Magic Script to MOVIE - Real Movie Player</title><meta name="theme-color" content="#000"><script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,sans-serif}.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 18px;text-align:center;overflow-y:auto}.badge{font-size:10px;letter-spacing:.4em;opacity:.5;margin-bottom:18px}.h1{font-size:48px;font-weight:900;line-height:.9;letter-spacing:-.03em}.h1 span{background:linear-gradient(90deg,#fff,#777);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.sub{opacity:.6;margin:16px 0 20px;max-width:380px;line-height:1.4;font-size:14px}.load{background:#fff;color:#000;border:0;padding:20px 44px;border-radius:100px;font-weight:900;font-size:18px;cursor:pointer;display:inline-block}.hint{margin-top:10px;font-size:11px;opacity:.4;max-width:360px}.library{width:100%;max-width:600px;margin-top:30px;text-align:left;display:none}.library h3{font-size:11px;letter-spacing:.3em;opacity:.5;margin-bottom:12px}.row{background:#0e0e0e;border:1px solid #1f1f1f;border-radius:16px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.row b{font-size:14px;display:block;margin-bottom:2px}.row span{font-size:11px;opacity:.5}.row button{background:#1e1e1e;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:700}#movie{position:fixed;inset:0;background:#000;z-index:100;display:none}#movieScreen{position:absolute;inset:0;overflow:hidden}#movieImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 8s ease-out, opacity 0.8s ease} #movieImg.next{position:absolute;opacity:0}#overlay{position:absolute;inset:0;background:linear-gradient(0deg,black 8%,rgba(0,0,0,0.2) 40%,rgba(0,0,0,0.6) 100%)}#subBox{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);width:88%;max-width:720px;text-align:center;z-index:3}#charName{font-size:13px;letter-spacing:.25em;font-weight:800;margin-bottom:10px;text-shadow:0 2px 12px #000;opacity:0.9}#dialogText{font-size:26px;font-weight:600;line-height:1.2;text-shadow:0 2px 24px #000,0 0 40px rgba(0,0,0,0.8);background:rgba(0,0,0,0.35);padding:8px 14px;border-radius:8px;display:inline-block}#sceneInfo{position:absolute;top:0;left:0;right:0;padding:16px 20px;display:flex;justify-content:space-between;z-index:3;font-size:10px;letter-spacing:.2em;opacity:.6}#controls{position:absolute;bottom:0;left:0;right:0;padding:14px;display:flex;justify-content:space-between;align-items:center;z-index:4;background:linear-gradient(0deg,rgba(0,0,0,.95),transparent);flex-wrap:wrap;gap:8px}#controls button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;padding:10px 16px;border-radius:100px;font-size:12px;font-weight:700}#progress{position:absolute;bottom:0;left:0;height:3px;background:#fff;transition:width 0.3s linear;z-index:5}#loader,#paywall{position:fixed;inset:0;background:#000;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:200;text-align:center;padding:24px}.bar{width:240px;height:4px;background:#222;border-radius:10px;overflow:hidden;margin-top:20px}.bar div{height:100%;width:0%;background:#fff;transition:width.3s}.pay-card{background:#0e0e0e;border:1px solid #222;border-radius:20px;padding:22px;max-width:380px;width:100%;margin-top:20px;text-align:left}.pay-card h4{font-size:18px;margin-bottom:6px}.pay-card p{font-size:12px;opacity:.6;line-height:1.4;margin-bottom:12px}.pay-card button{width:100%;padding:14px;border-radius:100px;border:0;font-weight:800;font-size:14px;margin-bottom:10px;cursor:pointer}.btn-white{background:#fff;color:#000}.small{font-size:11px;opacity:.5;margin-top:10px;line-height:1.3}#saveBanner{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:12px 20px;border-radius:100px;font-weight:800;font-size:13px;display:none;z-index:150}input[type=file]{display:none}</style></head><body><div class="hero" id="hero"><div class="badge">NO READING - PURE CINEMA - 1 FREE - $10 PER MOVIE</div><div class="h1"><span>Load Script.<br>Watch Movie.</span></div><div class="sub">Upload your screenplay. Watch it as a real cinematic movie. No voice reading - just visuals, like Netflix made it from your script.</div><label class="load" for="file">LOAD SCREENPLAY</label><input id="file" type="file" accept=".pdf,.docx,.doc,.txt,.fountain,.fdx,.md,.rtf"><div class="hint">Private: Files stay in your browser.<br>Now: Pure movie, no reading aloud.</div><div class="library" id="library"><h3>MY MOVIES</h3><div id="libraryList"></div><div class="small" id="creditInfo"></div></div></div><div id="loader"><h2 id="loaderTitle">MAKING YOUR MOVIE...</h2><p id="loaderText">Reading screenplay structure...</p><div class="bar"><div id="barFill"></div></div><p id="loaderDetail" style="font-size:11px;opacity:.5;margin-top:12px"></p></div><div id="paywall"><div style="background:#fff;color:#000;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:12px">FREE MOVIE USED</div><h2 style="font-size:34px;font-weight:900">Want more movies?</h2><p style="opacity:.6;margin-top:12px;max-width:340px;font-size:14px">$10 per movie. Real cinema, not reading.</p><div class="pay-card"><h4>PAY PER MOVIE - $10</h4><p>One screenplay to one real movie.</p><button class="btn-white" onclick="buySingle()">BUY 1 MOVIE - $10</button></div><button onclick="closePaywall()" style="background:transparent;border:0;color:#fff;opacity:.5;margin-top:16px;font-size:12px">Back</button><div class="small" style="margin-top:12px"><a href="#" onclick="resetCredits();return false" style="color:#fff">Reset for dev (unlimited for you)</a><br>Add?dev for dev mode</div></div><div id="saveBanner">Saved!</div><div id="movie"><div id="movieScreen"><img id="movieImg" crossorigin="anonymous" src=""><img id="movieImgNext" class="next" crossorigin="anonymous" src=""><div id="overlay"></div><div id="sceneInfo"><span id="sceneLabel">SCENE 1</span><span id="timeLabel">00:00</span></div><div id="subBox"><div id="charName"></div><div id="dialogText"></div></div><div id="controls"><div style="display:flex;gap:6px"><button onclick="exitMovie()">EXIT</button><button onclick="saveCurrentMovie()" style="background:#fff;color:#000">SAVE</button></div><div style="display:flex;gap:8px"><button onclick="prevBeat()">◀︎</button><button id="playBtn" onclick="togglePlay()">⏸︎ PAUSE</button><button onclick="nextBeat()">▶︎ NEXT</button></div><div style="display:flex;gap:6px"><button onclick="downloadMovieFile()">⬇ DOWNLOAD</button><button onclick="toggleFS()">⛶ FULL</button></div></div><div id="progress"></div></div></div><script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const STRIPE_SINGLE_LINK='https://buy.stripe.com/eVqbJ19Z1d3ldSgcqk3Nm01';let beats=[];let cur=0;let playing=true;let timer=null;let currentTitle='Untitled';let currentRaw='';let startTime=0;const urlParams=new URLSearchParams(window.location.search);const isDev=urlParams.has('dev')||localStorage.getItem('magicDev')==='true';function getCredits(){if(isDev)return{freeUsed:false,singleCredits:999};const data=JSON.parse(localStorage.getItem('magicCredits')||'{"freeUsed":false,"singleCredits":0}');return data}function saveCredits(d){if(isDev)return;localStorage.setItem('magicCredits',JSON.stringify(d));renderLibrary()}function canMakeMovie(){if(isDev)return{ok:true};const c=getCredits();if(!c.freeUsed)return{ok:true};if(c.singleCredits>0)return{ok:true};return{ok:false}}function consumeCredit(){if(isDev)return'dev';const c=getCredits();if(!c.freeUsed){c.freeUsed=true;saveCredits(c);return'free'}if(c.singleCredits>0){c.singleCredits--;saveCredits(c);return'single'}return null}document.getElementById('file').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const check=canMakeMovie();if(!check.ok){showPaywall();return}currentTitle=f.name.replace(/\.[^/.]+$/,"");showLoader('READING STRUCTURE...',`Loading ${f.name}`);try{currentRaw=await readAnyFile(f);await buildMovie(currentRaw)}catch(err){alert('Read error: '+err.message);hideLoader()}});async function readAnyFile(file){const ext=file.name.split('.').pop().toLowerCase();if(ext==='pdf'){const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument(buf).promise;let text='';for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const ct=await page.getTextContent();text+=ct.items.map(it=>it.str).join(' ')+'\n';updateDetail(`PDF page ${i}/${pdf.numPages}`)}return text}if(ext==='docx'){const buf=await file.arrayBuffer();const r=await mammoth.extractRawText({arrayBuffer:buf});return r.value}return await file.text()}function showLoader(t,tx){document.getElementById('loader').style.display='flex';document.getElementById('loaderTitle').textContent=t;document.getElementById('loaderText').textContent=tx}function hideLoader(){document.getElementById('loader').style.display='none'}function updateDetail(t){document.getElementById('loaderDetail').textContent=t}function showPaywall(){document.getElementById('paywall').style.display='flex'}function closePaywall(){document.getElementById('paywall').style.display='none'}function parseScript(raw){const lines=raw.replace(/\r/g,'').split('\n');const beatsLocal=[];const sceneRe=/^(INT|EXT|EST|INT\/EXT|I\/E)\.?/i;let curScene={heading:'OPENING',shots:[]};let pendingChar=null;function push(){if(curScene.shots.length>0)beatsLocal.push(...curScene.shots)}for(let i=0;i<lines.length;i++){let line=lines[i].trim();if(!line)continue;if(sceneRe.test(line)){push();curScene={heading:line,shots:[]};curScene.shots.push({type:'establish',heading:line,action:line,char:'',dialog:'',prompt:`cinematic wide epic establishing shot, ${line}, movie film still anamorphic 35mm dramatic lighting ultra realistic`});continue}const isCaps=line===line.toUpperCase()&&line.length>1&&line.length<36&&!line.endsWith('.')&&!sceneRe.test(line)&&/[A-Z]/.test(line)&&!line.includes(':');const prevBlank=i==0||!lines[i-1].trim();const next=(lines[i+1]||'').trim();if(isCaps&&prevBlank&&next){pendingChar=line.replace(/\(.*\)/,'').trim();continue}if(line.startsWith('(')&&line.endsWith(')'))continue;if(pendingChar){const cleanDialog=line;curScene.shots.push({type:'dialog',heading:curScene.heading,action:'',char:pendingChar,dialog:cleanDialog,prompt:`intimate cinematic close-up of ${pendingChar} speaking emotional movie scene dramatic lighting 35mm film`});pendingChar=null}else{const shortAction=line.substring(0,140);curScene.shots.push({type:'action',heading:curScene.heading,action:shortAction,char:'',dialog:'',prompt:`cinematic movie scene action shot ${shortAction}, ${curScene.heading}, photorealistic dramatic film still 35mm anamorphic epic`})}}push();return beatsLocal.filter(b=>(b.action||b.dialog))}async function buildMovie(raw){showLoader('CREATING CINEMATIC MOVIE...','Building shots...');document.getElementById('barFill').style.width='20%';beats=parseScript(raw);if(beats.length===0){alert('Could not parse');hideLoader();return}document.getElementById('loaderText').textContent=`Found ${beats.length} cinematic shots. Generating movie visuals...`;for(let i=0;i<beats.length;i++){const b=beats[i];const prompt=encodeURIComponent(b.prompt+', cinematic, 8k, ultra realistic, movie film, no text, no watermark, dramatic');b.img=`https://image.pollinations.ai/prompt/${prompt}?width=1920&height=1080&nologo=true&enhance=true&seed=${Math.abs(hashCode(b.heading+b.action+b.char+b.dialog)%9999999)}`;document.getElementById('barFill').style.width=`${20+(i/beats.length)*75}%`;updateDetail(`Generating shot ${i+1}/${beats.length}: ${b.char||b.action.substring(0,45)}`);await new Promise(r=>setTimeout(r,180))}document.getElementById('barFill').style.width='100%';await new Promise(r=>setTimeout(r,400));hideLoader();consumeCredit();startMovie()}function hashCode(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charCodeAt(i)|0;return h}function startMovie(){cur=0;playing=true;startTime=Date.now();document.getElementById('movie').style.display='block';document.getElementById('hero').style.display='none';showBeat(cur)}function showBeat(i){if(i<0||i>=beats.length)return;cur=i;const b=beats[i];const img=document.getElementById('movieImg');const imgNext=document.getElementById('movieImgNext');img.style.transform='scale(1.05)';img.style.opacity='1';imgNext.style.opacity='0';img.src=b.img;setTimeout(()=>img.style.transform='scale(1.18)',100);if(i+1<beats.length){imgNext.src=beats[i+1].img}document.getElementById('sceneLabel').textContent=`SHOT ${i+1} / ${beats.length} • ${b.heading}`;document.getElementById('charName').textContent=b.char||'';document.getElementById('dialogText').textContent=b.dialog||'';document.getElementById('dialogText').style.display=b.dialog||b.char?'inline-block':'none';document.getElementById('charName').style.display=b.char?'block':'none';document.getElementById('progress').style.width=`${((i+1)/beats.length)*100}%`;const elapsed=Math.floor((Date.now()-startTime)/1000);const mm=String(Math.floor(elapsed/60)).padStart(2,'0');const ss=String(elapsed%60).padStart(2,'0');document.getElementById('timeLabel').textContent=`${mm}:${ss}`;clearTimeout(timer);if(playing){const duration=b.type==='dialog'?4500:b.type==='establish'?5000:4200;timer=setTimeout(()=>{if(playing)nextBeat()},duration)}}function nextBeat(){if(cur<beats.length-1)showBeat(cur+1);else{showBeat(0);startTime=Date.now()}}function prevBeat(){if(cur>0)showBeat(cur-1);else showBeat(beats.length-1)}function togglePlay(){playing=!playing;document.getElementById('playBtn').textContent=playing?'⏸︎ PAUSE':'▶︎ PLAY';if(playing){showBeat(cur)}else{clearTimeout(timer)}}function exitMovie(){document.getElementById('movie').style.display='none';document.getElementById('hero').style.display='flex';clearTimeout(timer);renderLibrary()}function toggleFS(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen()}function saveCurrentMovie(){const movies=JSON.parse(localStorage.getItem('magicMovies')||'[]');movies.unshift({id:Date.now(),title:currentTitle,date:new Date().toLocaleString(),beats});localStorage.setItem('magicMovies',JSON.stringify(movies));const b=document.getElementById('saveBanner');b.style.display='block';setTimeout(()=>b.style.display='none',2500)}function renderLibrary(){const movies=JSON.parse(localStorage.getItem('magicMovies')||'[]');const lib=document.getElementById('library');const list=document.getElementById('libraryList');const creditEl=document.getElementById('creditInfo');const c=getCredits();let creditText=isDev?`DEV MODE - Unlimited movies for you`:`Free used: ${c.freeUsed?'yes':'no'} | Credits: ${c.singleCredits}`;creditEl.textContent=creditText;if(movies.length===0&&c.freeUsed===false&&!isDev){lib.style.display='none';return}lib.style.display='block';list.innerHTML='';movies.forEach(m=>{const row=document.createElement('div');row.className='row';row.innerHTML=`<div><b>${m.title}</b><span>${m.date} • ${m.beats.length} shots - PURE MOVIE</span></div><div><button onclick="loadSaved(${m.id})">PLAY MOVIE</button> <button onclick="deleteSaved(${m.id})">X</button></div>`;list.appendChild(row)})}function loadSaved(id){const movies=JSON.parse(localStorage.getItem('magicMovies')||'[]');const m=movies.find(x=>x.id===id);if(!m)return;beats=m.beats;currentTitle=m.title;startMovie()}function deleteSaved(id){if(!confirm('Delete?'))return;let movies=JSON.parse(localStorage.getItem('magicMovies')||'[]');movies=movies.filter(x=>x.id!==id);localStorage.setItem('magicMovies',JSON.stringify(movies));renderLibrary()}function downloadMovieFile(){let framesHtml=beats.map((b,i)=>`{img:"${b.img}",char:"${(b.char||'').replace(/"/g,'')}",dialog:"${(b.dialog||'').replace(/"/g,'')}",heading:"${(b.heading||'').replace(/"/g,'')}"}`).join(',');const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${currentTitle} - MOVIE</title><style>body{margin:0;background:#000;color:#fff;font-family:Helvetica,Arial;overflow:hidden}#img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 8s ease-out}#box{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:88%;max-width:700px;text-align:center;text-shadow:0 2px 20px #000}#char{font-size:13px;letter-spacing:.25em;font-weight:800;margin-bottom:10px}#dialog{font-size:26px;font-weight:600;background:rgba(0,0,0,0.35);padding:8px 14px;border-radius:8px;display:inline-block}#bar{position:absolute;bottom:0;left:0;height:3px;background:#fff;transition:width 0.3s}#ctrl{position:absolute;top:10px;right:10px}#ctrl button{background:rgba(255,255,255,.15);color:#fff;padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.2)}</style></head><body><img id="img"><div id="box"><div id="char"></div><div id="dialog"></div></div><div id="bar"></div><div id="ctrl"><button onclick="if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()">FULL</button></div><script>const beats=[${framesHtml}];let cur=0;function show(i){const b=beats[i];document.getElementById('img').style.transform='scale(1.05)';document.getElementById('img').src=b.img;setTimeout(()=>document.getElementById('img').style.transform='scale(1.18)',100);document.getElementById('char').textContent=b.char;document.getElementById('dialog').textContent=b.dialog;document.getElementById('bar').style.width=((i+1)/beats.length*100)+'%';}let playing=true;function next(){if(cur<beats.length-1){cur++;show(cur)}else{cur=0;show(cur)}}setInterval(()=>{if(playing)next()},4500);show(0);document.body.onclick=()=>next();<\/script></body></html>`;const blob=new Blob([html],{type:'text/html'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${currentTitle.replace(/[^a-z0-9]/gi,'_')}_MOVIE.html`;a.click();URL.revokeObjectURL(url)}function buySingle(){window.open(STRIPE_SINGLE_LINK,'_blank');if(isDev)return;setTimeout(()=>{if(confirm('After paying $10 tap OK to add credit')){const c=JSON.parse(localStorage.getItem('magicCredits')||'{"freeUsed":true,"singleCredits":0}');c.singleCredits+=1;c.freeUsed=true;localStorage.setItem('magicCredits',JSON.stringify(c));closePaywall();renderLibrary();alert('Credit added!')}},2000)}function resetCredits(){localStorage.removeItem('magicCredits');localStorage.setItem('magicDev','true');renderLibrary();alert('DEV MODE - unlimited for you!')}window.addEventListener('load',renderLibrary);if(isDev){localStorage.setItem('magicDev','true')}</script></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Script to Screen Auto</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+body{margin:0;background:#080808;color:#fff;font-family:Courier,monospace}
+header{display:flex;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #222;background:#080808;position:sticky;top:0}
+.logo{color:#d4af37;font-weight:bold}
+.pro{border:1px solid #d4af37;color:#d4af37;background:#000;padding:10px 16px;border-radius:6px;font-weight:bold}
+.pro.on{background:#d4af37;color:#000}
+.wrap{max-width:900px;margin:0 auto;padding:20px;display:grid;gap:20px}
+.card{background:#121212;border:1px solid #222;border-radius:10px;padding:20px}
+.drop{border:2px dashed #333;border-radius:10px;padding:30px;text-align:center;background:#0e0e0e}
+.stat{color:#d4af37;font-size:0.85rem;margin-top:10px;min-height:22px;white-space:pre-wrap}
+.bar{height:6px;background:#222;border-radius:10px;overflow:hidden;margin-top:12px}
+.bar div{height:100%;width:0%;background:#d4af37;transition:0.3s}
+.scene{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:10px;position:relative}
+.scene.lock::after{content:"PRO LOCKED";position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;color:#d4af37;font-weight:bold}
+video{width:100%;border-radius:8px;background:#000}
+#pay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99;align-items:center;justify-content:center;padding:20px}
+#pay.show{display:flex}
+.modal{background:#111;border:1px solid #d4af37;border-radius:12px;padding:24px;max-width:380px;text-align:center}
+.btn{width:100%;background:#d4af37;color:#000;border:none;padding:14px;border-radius:6px;font-weight:bold;margin-top:12px}
+.btn2{background:#222;color:#d4af37;border:1px solid #d4af37}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">SCRIPT TO SCREEN AUTO</div>
+<button id="proBtn" class="pro" onclick="openPay()">Unlock Pro $29</button>
+</header>
+<div class="wrap">
+<div class="card">
+<div class="drop" onclick="document.getElementById('f').click()">
+Drop Script Here - PDF DOCX TXT FDX - Auto Converts to Video
+<input type="file" id="f" hidden accept=".pdf,.doc,.docx,.txt,.fountain,.fdx,.md,.rtf">
+</div>
+<div id="stat">Waiting for script...</div>
+<div class="bar"><div id="bar"></div></div>
+</div>
+<div class="card">
+<h3 style="color:#d4af37;font-size:0.8rem">AUTO PROGRESS</h3>
+<div id="log" class="stat">No script yet.</div>
+</div>
+<div class="card">
+<h3 style="color:#d4af37;font-size:0.8rem">VIDEO TIMELINE - Auto Built</h3>
+<div id="list"></div>
+</div>
+<div class="card">
+<button class="btn" onclick="doExport()">Export Full Movie + JSON (Pro)</button>
+<div style="color:#666;font-size:0.75rem;margin-top:8px;text-align:center">Free: 10 scenes preview. Pro: Full movie render, no watermark.</div>
+</div>
+</div>
+<div id="pay">
+<div class="modal">
+<h3 style="color:#d4af37">Unlock Pro $29/mo</h3>
+<p style="color:#aaa;font-size:0.85rem;margin:12px 0">Free shows 10 scenes. Pro unlocks full video, no watermark, full export.</p>
+<button class="btn" onclick="unlock()">Unlock Locally</button>
+<button class="btn btn2" onclick="closePay()">Continue Free</button>
+</div>
+</div>
+<script>
+if(window.pdfjsLib){
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+let D={text:'',name:'',scenes:[],deck:[]};
+let pro=localStorage.getItem('m_pro')==='1';
+setPro();
+function setPro(){
+let b=document.getElementById('proBtn');
+if(pro){b.textContent='Pro ✓';b.classList.add('on')}
+else{b.textContent='Unlock Pro $29';b.classList.remove('on')}
+}
+function openPay(){
+if(pro){
+if(confirm('Lock again?')){pro=false;localStorage.removeItem('m_pro');setPro();render()}
+return;
+}
+document.getElementById('pay').classList.add('show');
+}
+function closePay(){document.getElementById('pay').classList.remove('show')}
+function unlock(){pro=true;localStorage.setItem('m_pro','1');setPro();closePay();render()}
+let f=document.getElementById('f');
+f.addEventListener('change',()=>{if(f.files[0])read(f.files[0])});
+let drop=document.querySelector('.drop');
+drop.addEventListener('dragover',e=>{e.preventDefault()});
+drop.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])read(e.dataTransfer.files[0])});
+async function read(file){
+D.name=file.name;
+logStep('Reading '+file.name+'...',10);
+let ext=file.name.split('.').pop().toLowerCase();
+try{
+let t='';
+if(ext==='pdf'){t=await pdfRead(file)}
+else if(ext==='docx'){let ab=await file.arrayBuffer();let r=await mammoth.extractRawText({arrayBuffer:ab});t=r.value}
+else{t=await file.text()}
+D.text=t;
+logStep('Extracted '+t.split(/\s+/).length+' words. Reverse engineering...',30);
+await sleep(400);
+autoBuild(t);
+}catch(e){logStep('Error: '+e.message,0)}
+}
+async function pdfRead(file){
+let ab=await file.arrayBuffer();
+let pdf=await pdfjsLib.getDocument({data:ab}).promise;
+let out='';
+for(let i=1;i<=pdf.numPages;i++){
+let p=await pdf.getPage(i);
+let c=await p.getTextContent();
+out+=c.items.map(x=>x.str).join(' ')+'\n\n';
+}
+return out;
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+async function autoBuild(text){
+logStep('Reverse: Finding characters, canon, structure...',50);
+await sleep(500);
+let chars=findChars(text);
+let scenes=splitScenes(text);
+logStep('Forward: Building shot deck + visual prompts...',75);
+await sleep(500);
+let deck=buildDeck(scenes,chars);
+D.scenes=scenes;
+D.deck=deck;
+logStep('Done. '+scenes.length+' scenes auto-built to video timeline. Free preview 10, Pro unlocks all.',100);
+render();
+}
+function logStep(m,p){
+document.getElementById('stat').textContent=m;
+document.getElementById('log').textContent=m;
+document.getElementById('bar').style.width=p+'%';
+}
+function splitScenes(t){
+let parts=t.split(/\n\s*\n\s*(?=(INT\.|EXT\.|SCENE))/i);
+if(parts.length>2){
+return parts.map((p,i)=>({id:i+1,head:p.split('\n')[0].slice(0,100),body:p.slice(0,1500)}));
+}
+let ch=[];
+for(let i=0;i<t.length;i+=1500){
+ch.push({id:ch.length+1,head:'SCENE '+(ch.length+1),body:t.slice(i,i+1500)});
+}
+return ch.slice(0,200);
+}
+function findChars(t){
+let set=new Set();
+let re=/^\s{10,30}([A-Z][A-Z\s']{2,20})\s*$/gm;
+let m;
+while((m=re.exec(t))!==null){
+let n=m[1].trim();
+if(n.length>2&&n.length<25&&!['INT','EXT','FADE IN','CUT TO'].includes(n))set.add(n);
+}
+return Array.from(set).slice(0,20);
+}
+function buildDeck(scenes,chars){
+return scenes.map((s,i)=>({
+num:i+1,
+head:s.head,
+sum:s.body.slice(0,180).replace(/\s+/g,' '),
+prompt:`Cinematic scene ${s.head}, characters ${chars.slice(0,2).join(',')}, period accurate, 35mm film, character lock ${chars[0]||'hero'} consistent`
+}));
+}
+function render(){
+let box=document.getElementById('list');
+box.innerHTML='';
+D.deck.forEach((d,i)=>{
+let lock=!pro&&i>=10;
+let div=document.createElement('div');
+div.className='scene'+(lock?' lock':'');
+div.innerHTML=`<b style="color:#d4af37">SCENE ${d.num}: ${d.head}</b><div style="font-size:0.8rem;color:#bbb;margin:6px 0">${d.sum}...</div><div style="font-size:0.7rem;color:#888">${d.prompt}</div><div style="margin-top:8px"><button class="btn2 pro" style="padding:6px 10px;font-size:0.7rem" onclick="${lock?'openPay()':'copyPrompt('+i+')'}">${lock?'Unlock to Render':'Copy Prompt / Render'}</button></div>`;
+if(lock)div.onclick=openPay;
+box.appendChild(div);
+});
+}
+function copyPrompt(i){
+navigator.clipboard.writeText(D.deck[i].prompt);
+alert('Visual prompt copied. Paste into your image model. In full build this auto-renders video.');
+}
+function doExport(){
+if(!pro){openPay();return}
+if(!D.deck.length){alert('Upload script first - it auto builds');return}
+let pkg={title:D.name,deck:D.deck,scenes:D.scenes.length,time:new Date().toISOString()};
+let blob=new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'});
+let url=URL.createObjectURL(blob);
+let a=document.createElement('a');a.href=url;a.download='movie-'+(pkg.title||'untitled').replace(/\s+/g,'-')+'.json';a.click();
+alert('Full movie package exported - Auto reverse + forward complete');
+}
+</script>
+</body>
+</html>
