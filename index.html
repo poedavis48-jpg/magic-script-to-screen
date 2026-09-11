@@ -3,212 +3,207 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Your Movie Maker - Generic Launch</title>
+<title>Your Movie Maker - $10 Paywall + Free AI</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#d4af37">
 <style>
 body{margin:0;background:#080808;color:#fff;font-family:Courier,monospace}
-header{display:flex;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #222;position:sticky;top:0;background:#080808;z-index:10}
-.logo{color:#d4af37;font-weight:bold;font-size:0.9rem}
-.pro{border:1px solid #d4af37;color:#d4af37;background:#000;padding:10px 16px;border-radius:6px;font-weight:bold;font-size:0.8rem}
+header{padding:12px;display:flex;justify-content:space-between;border-bottom:1px solid #222;background:#080808;position:sticky;top:0;z-index:10}
+.pro{border:1px solid #d4af37;color:#d4af37;background:#000;padding:8px 12px;border-radius:6px;font-size:0.7rem;cursor:pointer}
 .pro.on{background:#d4af37;color:#000}
-.wrap{max-width:900px;margin:0 auto;padding:20px;display:grid;gap:20px}
-.card{background:#121212;border:1px solid #222;border-radius:12px;padding:18px}
-.drop{border:2px dashed #333;border-radius:12px;padding:28px;text-align:center;background:#0e0e0e;cursor:pointer}
-.stat{color:#d4af37;font-size:0.8rem;margin-top:10px;white-space:pre-wrap;min-height:20px}
-.bar{height:6px;background:#222;border-radius:10px;overflow:hidden;margin-top:12px}
-.bar div{height:100%;width:0%;background:#d4af37;transition:0.4s}
-.movie{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.movie img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 6s ease-out}
-.movie.playing img{transform:scale(1.08)}
-.sub{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.95));padding:16px;color:#fff;text-align:center;font-size:0.9rem;line-height:1.4}
-.btn{width:100%;background:#d4af37;color:#000;border:none;padding:12px;border-radius:8px;font-weight:bold}
-.btn2{background:#222;color:#d4af37;border:1px solid #d4af37;padding:12px;border-radius:8px;font-weight:bold;font-size:0.8rem}
-.scene{display:flex;gap:10px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;margin-bottom:10px}
-.scene img{width:90px;height:52px;object-fit:cover;border-radius:6px;background:#111;flex-shrink:0}
-.row{display:flex;gap:8px;margin-top:10px}
-#pay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99;align-items:center;justify-content:center;padding:20px}
+.wrap{max-width:900px;margin:0 auto;padding:14px;display:grid;gap:14px}
+.card{background:#121212;border:1px solid #222;border-radius:12px;padding:14px}
+.drop{border:2px dashed #555;border-radius:10px;padding:20px;text-align:center;background:#0e0e0e;cursor:pointer}
+.stat{color:#d4af37;font-size:0.72rem;margin-top:8px;white-space:pre-wrap}
+.bar{height:6px;background:#222;border-radius:6px;overflow:hidden;margin-top:8px}
+.bar div{height:100%;width:0%;background:#d4af37;transition:0.3s}
+.movie{width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.movie img{width:100%;height:100%;object-fit:cover}
+.sub{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.92));padding:10px;text-align:center;font-size:0.85rem;line-height:1.3}
+.btn{width:100%;background:#d4af37;color:#000;border:none;padding:12px;border-radius:8px;font-weight:bold;cursor:pointer}
+.btn2{background:#222;color:#d4af37;border:1px solid #d4af37;padding:10px;border-radius:8px;font-size:0.72rem;cursor:pointer}
+.scene{display:flex;gap:8px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px;margin-bottom:8px}
+.scene img{width:80px;height:45px;object-fit:cover;border-radius:5px;background:#222;flex-shrink:0}
+.row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+#pay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
 #pay.show{display:flex}
-.modal{background:#111;border:1px solid #d4af37;border-radius:12px;padding:24px;max-width:380px;text-align:center}
+.modal{background:#111;border:2px solid #d4af37;border-radius:14px;padding:22px;max-width:380px;width:100%;text-align:center}
 </style>
 </head>
 <body>
 <header>
-<div class="logo">YOUR MOVIE MAKER</div>
-<button id="proBtn" class="pro">Pro ✓ Unlocked</button>
+<div style="color:#d4af37;font-weight:bold;font-size:0.8rem">YOUR MOVIE MAKER</div>
+<button id="proBtn" class="pro" onclick="openPay()">Pro ✓ Unlocked</button>
 </header>
 <div class="wrap">
 <div class="card">
-<div class="drop" onclick="document.getElementById('f').click()">
-Drop Any Screenplay - Works For Everyone<br>
-<span style="font-size:0.7rem;color:#777">Generic Voices - Any Character Gets Unique Voice - 500 Scenes</span>
-<input type="file" id="f" hidden accept=".pdf,.doc,.docx,.txt,.fountain,.fdx,.md,.rtf">
-</div>
+<div class="drop" onclick="document.getElementById('f').click()">Drop SMOKEY ROW - 1st Movie FREE<br><span style="font-size:0.6rem;color:#888">After that $10 per movie - Free AI voices built in</span><input type="file" id="f" hidden accept=".pdf,.docx,.txt"></div>
 <div id="stat">Waiting...</div>
 <div class="bar"><div id="bar"></div></div>
 </div>
 <div class="card">
 <div class="movie" id="player">
-<div id="ph" style="color:#666;text-align:center">Movie plays here</div>
-<img id="pImg" style="display:none" alt="">
+<div id="ph" style="color:#666;text-align:center">1st Movie FREE - Then $10</div>
+<img id="pImg" style="display:none">
 <canvas id="cvs" width="1024" height="576" style="display:none;position:absolute;inset:0;width:100%;height:100%"></canvas>
-<div class="sub" id="sub">Drop any script</div>
+<div class="sub" id="sub">Drop script</div>
 </div>
+<audio id="aud" controls style="width:100%;display:none;margin-top:8px"></audio>
 <div class="row">
-<button class="btn" onclick="playMovie()">▶ Play Movie</button>
+<button class="btn" onclick="playMovie()">▶ Play</button>
 <button class="btn2" onclick="pauseMovie()">Pause</button>
-<button class="btn2" onclick="toggleVoice()">Voice:<span id="vLab">ON</span></button>
-<button class="btn2" onclick="toggleSub()">Subs:<span id="sLab">ON</span></button>
-</div>
-<div class="row">
-<button class="btn2" onclick="castMovie()">Cast to TV</button>
+<button class="btn2" onclick="toggleVoice()">AI Voice:<span id="vLab">ON</span></button>
 <button class="btn2" onclick="nextScene()">Next</button>
 </div>
-<div id="log" class="stat">Generic engine - works for any screenplay.</div>
+<div id="log" class="stat">Paywall: 1 FREE, then $10 per movie or $29 Pro Unlimited - Free AI inside</div>
 </div>
 <div class="card">
-<h3 style="color:#d4af37;font-size:0.75rem">SCENES <span id="count" style="float:right;color:#666">0</span></h3>
+<h3 style="color:#d4af37;font-size:0.7rem">SCENES <span id="count" style="float:right;color:#666">0</span></h3>
 <div id="list"></div>
-<div id="moreWrap" style="text-align:center;display:none"><button class="btn2" onclick="showMore()">Load More</button></div>
 </div>
 </div>
-<div id="pay"><div class="modal"><h3 style="color:#d4af37">Unlock</h3><button class="btn" onclick="unlock()">Unlock Dev Test</button><button class="btn2" onclick="closePay()">Preview</button></div></div>
+<div id="pay">
+<div class="modal">
+<h2 style="color:#d4af37;margin:0 0 10px 0">🔒 Unlock Your Movie</h2>
+<p style="color:#ccc;font-size:0.85rem">You already watched 1 FREE movie.<br>Every movie after is <b style="color:#d4af37">$10</b><br>or go unlimited Pro for <b style="color:#d4af37">$29</b></p>
+<p style="color:#888;font-size:0.7rem">Free AI voices + images built in - No extra cost</p>
+<button class="btn" onclick="buy10()">Unlock This Movie $10</button>
+<div style="height:8px"></div>
+<button class="btn" style="background:#fff;color:#000" onclick="buy29()">Unlock Unlimited $29 - Best Deal</button>
+<div style="height:12px"></div>
+<button class="btn2" onclick="closePay()">Preview Only (No Voice)</button>
+<div style="margin-top:12px;color:#666;font-size:0.6rem">After payment, movie unlocks automatically</div>
+</div>
+</div>
 <script>
 if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}
-let D={deck:[],imgs:[],name:''};
-let pro=localStorage.getItem('m_pro')==='1';
-let cur=0,timer=null,voiceOn=true,subOn=true,synth=window.speechSynthesis,voices=[],HERO_SEED=42,visibleCount=20;
-function loadVoices(){if(synth)voices=synth.getVoices()||[];}
-if(synth){loadVoices();synth.onvoiceschanged=loadVoices;}
-function setPro(){let b=document.getElementById('proBtn');if(b){b.textContent=pro?'Pro ✓ Unlocked':'Unlock Pro $29';b.className=pro?'pro on':'pro';}}setPro();
-function openPay(){document.getElementById('pay').classList.add('show')}function closePay(){document.getElementById('pay').classList.remove('show')}
-function unlock(){pro=true;localStorage.setItem('m_pro','1');setPro();closePay();render();lazyBuild()}
-function toggleVoice(){voiceOn=!voiceOn;document.getElementById('vLab').textContent=voiceOn?'ON':'OFF';if(!voiceOn&&synth)synth.cancel();}
-function toggleSub(){subOn=!subOn;document.getElementById('sLab').textContent=subOn?'ON':'OFF';document.getElementById('sub').style.display=subOn?'block':'none';}
+let D={deck:[],imgs:[]};let cur=0,timer=null,voiceOn=true;let seed=77;
+let voiceMap={};let voiceList=['Brian','Joey','Matthew','Salli','Kimberly','Kendra'];
+let synth=window.speechSynthesis;let voices=[];
+let freeMoviesUsed=parseInt(localStorage.getItem('mm_free_used')||'0');
+let isPro=localStorage.getItem('m_pro')==='1';
+let paidMovies=JSON.parse(localStorage.getItem('mm_paid')||'[]');
+function loadV(){if(synth)voices=synth.getVoices();}if(synth){loadV();synth.onvoiceschanged=loadV;}
+function setProBtn(){let b=document.getElementById('proBtn');if(!b)return;if(isPro){b.textContent='Pro ✓ Unlocked';b.className='pro on';}else{b.textContent=freeMoviesUsed===0?'1st Movie FREE':'$10 / Movie or $29 Pro';b.className='pro';}}setProBtn();
+function setBar(p,m){document.getElementById('bar').style.width=p+'%';document.getElementById('stat').textContent=m;document.getElementById('log').textContent=m;}
+function openPay(){document.getElementById('pay').classList.add('show');}
+function closePay(){document.getElementById('pay').classList.remove('show');}
+function buy10(){
+// TODO: Replace with your real Stripe link for $10
+// For now dev unlock:
+let id=D.deck[0]?D.deck[0].head.slice(0,20):'movie_'+Date.now();
+paidMovies.push(id);localStorage.setItem('mm_paid',JSON.stringify(paidMovies));
+closePay();alert('Dev Test: Movie Unlocked $10 - In launch, replace with real Stripe $10 link');
+render();show(0);
+}
+function buy29(){
+isPro=true;localStorage.setItem('m_pro','1');setProBtn();closePay();
+alert('Dev Test: Pro Unlocked $29 Unlimited - In launch, replace with real Stripe $29 link');
+render();
+}
 document.getElementById('f').addEventListener('change',e=>{if(e.target.files[0])read(e.target.files[0])});
-let drop=document.querySelector('.drop');
-drop.addEventListener('dragover',e=>{e.preventDefault()});drop.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])read(e.dataTransfer.files[0])});
+let drop=document.querySelector('.drop');drop.addEventListener('dragover',e=>{e.preventDefault()});drop.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])read(e.dataTransfer.files[0])});
 async function read(file){
 try{
-D.name=file.name;setBar(5,'Reading '+file.name+'...');
+setBar(5,'Reading '+file.name+'...');
 let ext=file.name.split('.').pop().toLowerCase();let t='';
-if(ext==='pdf'){t=await pdfRead(file)}else if(ext==='docx'){let ab=await file.arrayBuffer();let r=await mammoth.extractRawText({arrayBuffer:ab});t=r.value||'';}else{t=await file.text();}
-if(!t||t.trim().length<20)throw new Error('Empty');
-let scenes=splitSmart(t);
-setBar(40,'Found '+scenes.length+' scenes');
-let chars=findChars(t);
-HERO_SEED=chars[0]?chars[0].split('').reduce((a,b)=>a+b.charCodeAt(0),0)+42:42;
-let deck=buildDeck(scenes,chars);
-D.deck=deck;D.imgs=new Array(deck.length).fill('');visibleCount=20;
-setBar(65,'Building cinematic shots...');
-await makeFirstBatch(deck);
-setBar(100,'Done - '+deck.length+' scenes - Generic voices ready');
-render();show(0);lazyBuild();
+if(ext==='pdf'){let ab=await file.arrayBuffer();let pdf=await pdfjsLib.getDocument({data:ab}).promise;let out='';for(let i=1;i<=pdf.numPages;i++){let pg=await pdf.getPage(i);let c=await pg.getTextContent();out+=c.items.map(x=>x.str).join(' ')+'\n';}t=out;}
+else if(ext==='docx'){let ab=await file.arrayBuffer();let r=await mammoth.extractRawText({arrayBuffer:ab});t=r.value||'';}else{t=await file.text();}
+if(t.length<20)throw new Error('empty');
+setBar(20,'Reverse engineering...');
+// Check paywall BEFORE building
+let currentId=file.name.slice(0,20);
+let needsPay=!isPro && freeMoviesUsed>=1 &&!paidMovies.includes(currentId);
+if(needsPay){
+setBar(0,'Paywall: Need $10 unlock');
+openPay();
+return;
+}
+let scenes=reverseEngineer(t);
+setBar(50,'Found '+scenes.length+' real scenes');
+let deck=scenes.map((s,i)=>({num:i+1,head:s.location,location:s.location,time:s.time,action:s.action,dialogues:s.dialogues,line:s.dialogues[0]?s.dialogues[0].text:s.action,prompt:'cinematic film still, '+s.location+', dramatic lighting'}));
+D.deck=deck;D.imgs=new Array(deck.length).fill('');
+// Mark free movie used after first successful parse
+if(freeMoviesUsed===0&&!isPro){freeMoviesUsed=1;localStorage.setItem('mm_free_used','1');setProBtn();}
+setBar(70,'Building free AI images...');
+for(let i=0;i<Math.min(12,deck.length);i++){
+let url=`https://image.pollinations.ai/prompt/${encodeURIComponent(deck[i].prompt)}?width=1024&height=576&nologo=true&seed=${seed+i}&model=turbo`;
+D.imgs[i]=url;let im=new Image();im.src=url;await new Promise(r=>{im.onload=r;im.onerror=r;setTimeout(r,1000);});
+}
+setBar(100,'Done - '+(freeMoviesUsed===1&&!isPro?'1st FREE movie ready':'Movie ready'));
+render();show(0);
 }catch(e){setBar(0,'Error '+e.message)}
 }
-function setBar(p,m){document.getElementById('bar').style.width=p+'%';document.getElementById('stat').textContent=m;document.getElementById('log').textContent=m;}
-function wait(ms){return new Promise(r=>setTimeout(r,ms))}
-async function pdfRead(file){let ab=await file.arrayBuffer();let pdf=await pdfjsLib.getDocument({data:ab}).promise;let out='';for(let i=1;i<=pdf.numPages;i++){let pg=await pdf.getPage(i);let c=await pg.getTextContent();out+=c.items.map(x=>x.str).join(' ')+'\n\n';}return out;}
-function splitSmart(t){
-let parts=t.split(/\n\s*(?=(?:INT\.|EXT\.|FADE IN|FADE OUT|SCENE \d+|CHAPTER))/i).filter(x=>x&&x.trim().length>40);
-if(parts.length>=4){return parts.map((p,i)=>({id:i+1,head:(p.split('\n')[0]||'Scene '+(i+1)).slice(0,90).trim(),body:p.slice(0,1200)})).slice(0,500);}
-let ch=[];for(let i=0;i<t.length&&ch.length<500;i+=1300){ch.push({id:ch.length+1,head:'SCENE '+(ch.length+1),body:t.slice(i,i+1300)});}return ch;
+function reverseEngineer(t){
+let clean=t.replace(/\s+/g,' ').trim();
+let regex=/(FADE IN:|EXT\. [A-Z0-9.'-]+|INT\. [A-Z0-9.'-]+)/gi;
+let indices=[...clean.matchAll(regex)];
+let scenes=[];
+if(indices.length>=2){
+for(let i=0;i<indices.length;i++){
+let start=indices[i].index;let end=indices[i+1]?indices[i+1].index:clean.length;
+let chunk=clean.slice(start,end).slice(0,2000);
+let location=(chunk.match(/(EXT\.|INT\.) [^-]+/i)||[chunk.slice(0,60)])[0];
+let time=(chunk.match(/- (MORNING|NIGHT|DAY|EVENING|CONTINUOUS|DAWN|DUSK)/i)||[''])[0];
+let dialogues=[];let dRegex=/([A-Z][A-Z\s']{2,18})\s+([A-Za-z][^A-Z]{5,140})/g;let dm;
+while((dm=dRegex.exec(chunk))!==null){
+let name=dm[1].trim();let text=dm[2].trim();
+if(name.length>2&&name.length<20&&!['EXT','INT','FADE','MORNING','NIGHT'].includes(name)&&text.length>5){
+if(!text.toUpperCase().includes('EXT.')&&!text.toUpperCase().includes('INT.')){
+dialogues.push({char:name,text:text.slice(0,140)});
 }
-function findChars(t){let set=new Set();let re=/^\s*([A-Z][A-Z\s']{2,20})\s*$/gm;let m;while((m=re.exec(t))!==null){let n=m[1].trim();if(n.length>2&&n.length<25&&!['INT','EXT','FADE IN','CUT TO','FADE OUT','SMOKEY ROW'].includes(n)&&n.split(' ').length<=3)set.add(n);}return Array.from(set).slice(0,20);}
-function buildDeck(scenes,chars){
-return scenes.map((s,i)=>{
-let firstLine=s.body.split('\n').find(x=>x.trim().length>15)||s.body.slice(0,140);
-let found=s.body.match(new RegExp(chars.join('|'),'i'));
-let who=found?found[0].toUpperCase():chars[0]||'NARRATOR';
-return{num:i+1,head:s.head||('Scene '+(i+1)),sum:s.body.slice(0,140).replace(/\s+/g,' ').trim(),line:firstLine.trim().slice(0,160),prompt:'cinematic movie still, dramatic lighting, 35mm film, highly detailed, 16:9',char:who};
-});
-}
-async function makeFirstBatch(deck){
-for(let i=0;i<Math.min(15,deck.length);i++){
-let d=deck[i];let simple=encodeURIComponent(d.prompt);
-let url=`https://image.pollinations.ai/prompt/${simple}?width=1024&height=576&nologo=true&seed=${HERO_SEED+i}&model=turbo`;
-D.imgs[i]=url;let img=new Image();img.src=url;
-await new Promise(r=>{img.onload=r;img.onerror=r;setTimeout(r,1500);});
+if(dialogues.length>=6)break;
 }
 }
-async function lazyBuild(){
-for(let i=15;i<(pro?D.deck.length:15);i++){
-if(D.imgs[i])continue;
-let d=D.deck[i];let simple=encodeURIComponent(d.prompt);
-D.imgs[i]=`https://image.pollinations.ai/prompt/${simple}?width=1024&height=576&nologo=true&seed=${HERO_SEED+i}&model=turbo`;
-await wait(700);if(i%15===0)render();
-}render();
+let action=chunk.split('.').slice(0,2).join('.').slice(0,150);
+scenes.push({location:location.trim().slice(0,80),time:time,action:action,dialogues:dialogues.length?dialogues:[{char:'NARRATOR',text:action}]});
 }
-function drawTitleCard(head,num){
-let cvs=document.getElementById('cvs');if(!cvs)return '';
-let ctx=cvs.getContext('2d');ctx.clearRect(0,0,cvs.width,cvs.height);
-let grad=ctx.createLinearGradient(0,0,0,cvs.height);grad.addColorStop(0,'#1e1e1e');grad.addColorStop(1,'#000');ctx.fillStyle=grad;ctx.fillRect(0,0,cvs.width,cvs.height);
-ctx.fillStyle='#d4af37';ctx.font='bold 32px Courier';ctx.textAlign='center';ctx.fillText(('SCENE '+num).slice(0,40),cvs.width/2,240);
-ctx.fillStyle='#fff';ctx.font='20px Courier';ctx.fillText(head.slice(0,90),cvs.width/2,300);
-return cvs.toDataURL('image/png');
+}else{
+for(let i=0;i<clean.length&&scenes.length<100;i+=1300){let chunk=clean.slice(i,i+1300);scenes.push({location:'SCENE '+(scenes.length+1),time:'',action:chunk.slice(0,100),dialogues:[{char:'NARRATOR',text:chunk.slice(0,120)}]});}
+}
+return scenes.slice(0,500);
+}
+function drawCard(head){
+let c=document.getElementById('cvs');let ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+let g=ctx.createLinearGradient(0,0,0,c.height);g.addColorStop(0,'#222');g.addColorStop(1,'#000');ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+ctx.fillStyle='#d4af37';ctx.font='bold 26px Courier';ctx.textAlign='center';ctx.fillText(head.slice(0,70),c.width/2,280);
+return c.toDataURL();
 }
 function render(){
-let box=document.getElementById('list');box.innerHTML='';
-document.getElementById('count').textContent=D.deck.length+' scenes';
-let upTo=Math.min(visibleCount,D.deck.length);
-for(let i=0;i<upTo;i++){
-let d=D.deck[i];let div=document.createElement('div');div.className='scene';
-let img=document.createElement('img');img.style.width='90px';img.style.height='52px';img.style.objectFit='cover';img.style.borderRadius='6px';img.style.background='#111';img.style.flexShrink='0';
-if(D.imgs[i]){img.src=D.imgs[i];img.onerror=function(){this.src=drawTitleCard(d.head,d.num);};}
-else{img.src=drawTitleCard(d.head,d.num);}
-let txt=document.createElement('div');txt.style.flex='1';txt.innerHTML=`<b style="color:#d4af37">${d.head}</b><div style="font-size:0.68rem;color:#aaa">${d.line}</div>`;
+let box=document.getElementById('list');box.innerHTML='';document.getElementById('count').textContent=D.deck.length+' scenes';
+D.deck.forEach((d,i)=>{
+let div=document.createElement('div');div.className='scene';
+let img=document.createElement('img');img.src=D.imgs[i]||drawCard(d.head);img.onerror=function(){this.src=drawCard(d.head);};
+let txt=document.createElement('div');txt.style.flex='1';
+let dlg=d.dialogues.map(x=>`<b style="color:#d4af37">${x.char}</b>: ${x.text}`).join('<br>').slice(0,160);
+txt.innerHTML=`<b style="color:#fff;font-size:0.7rem">${d.head}</b><div style="font-size:0.6rem;color:#aaa">${dlg}</div>`;
 div.appendChild(img);div.appendChild(txt);div.onclick=()=>show(i);box.appendChild(div);
+});
 }
-document.getElementById('moreWrap').style.display=upTo<D.deck.length?'block':'none';
+function getVoiceFor(name){if(!voiceMap[name]){let h=0;for(let c of name)h=(h*31+c.charCodeAt(0))%voiceList.length;voiceMap[name]=voiceList[h];}return voiceMap[name];}
+async function speakDialogue(dialogues){
+if(!voiceOn||!dialogues||!dialogues.length)return;
+let aud=document.getElementById('aud');
+try{
+let d=dialogues[0];let voice=getVoiceFor(d.char);let text=encodeURIComponent(d.text.slice(0,200));
+let url=`https://api.streamelements.com/kappa/v2/speech?voice=${voice}&text=${text}`;
+aud.src=url;aud.style.display='block';await aud.play().catch(()=>{});
+}catch(e){if(synth){let u=new SpeechSynthesisUtterance(dialogues[0].text);synth.cancel();synth.speak(u);}}
 }
-function showMore(){visibleCount+=20;render();lazyBuild();}
-function hashName(name){let h=0;for(let c of name){h=(h*31+c.charCodeAt(0))%1000;}return h;}
 function show(i){
 if(i<0||i>=D.deck.length)return;cur=i;let d=D.deck[i];
 let pImg=document.getElementById('pImg');let ph=document.getElementById('ph');let sub=document.getElementById('sub');
-let player=document.getElementById('player');player.classList.remove('playing');void player.offsetWidth;player.classList.add('playing');
-if(D.imgs[i]){pImg.src=D.imgs[i];pImg.style.display='block';ph.style.display='none';pImg.onerror=function(){let data=drawTitleCard(d.head+' '+d.line,d.num);if(data){this.src=data;}};}
-else{let data=drawTitleCard(d.head+' '+d.line,d.num);if(data){pImg.src=data;pImg.style.display='block';ph.style.display='none';}}
-sub.innerHTML=`<b style="color:#d4af37">${d.head} (${i+1}/${D.deck.length}) - ${d.char}</b><br>${d.line}`;
-sub.style.display=subOn?'block':'none';
-if(voiceOn)speak(d);
+let url=D.imgs[i]||'';
+if(url){pImg.src=url;pImg.style.display='block';ph.style.display='none';pImg.onerror=function(){this.src=drawCard(d.head);};}
+else{pImg.src=drawCard(d.head);pImg.style.display='block';ph.style.display='none';}
+sub.innerHTML=`<b style="color:#d4af37">${d.head} ${d.time}</b><br>${d.dialogues[0]?'<b>'+d.dialogues[0].char+':</b> '+d.dialogues[0].text:d.action}`;
+speakDialogue(d.dialogues);
 }
-function speak(d){
-if(!voiceOn||!synth||!d)return;
-try{
-synth.cancel();
-let txt=d.line||d.sum||'';if(!txt)return;
-let char=d.char||'NARRATOR';
-let h=hashName(char);
-// Generic: every name gets its own pitch and rate based on hash, works for ANY screenplay
-let pitch=0.7 + (h%400)/1000; // 0.7 to 1.1
-let rate=0.85 + (h%300)/1000; // 0.85 to 1.15
-let utt=new SpeechSynthesisUtterance(txt);
-utt.pitch=Math.min(1.4,Math.max(0.6,pitch + (txt.includes('!')?0.15:0)));
-utt.rate=Math.min(1.3,Math.max(0.7,rate + (txt.includes('...')?-0.15:0)));
-if(voices&&voices.length){
-let en=voices.filter(v=>v.lang&&v.lang.startsWith('en'));
-let vIndex=h%Math.max(1,en.length);
-let pick=en[vIndex]||voices[0];
-if(pick)utt.voice=pick;
-}
-synth.speak(utt);
-}catch(e){}
-}
-function playMovie(){
-if(!D.deck.length){alert('Drop script');return}
-pauseMovie();show(cur);
-function next(){
-let txt=D.deck[cur]?(D.deck[cur].line||''):'';
-let delay=Math.max(4500,Math.min(9000,txt.length*75));
-timer=setTimeout(()=>{let nxt=D.imgs[(cur+1)%D.deck.length];if(nxt){let pre=new Image();pre.src=nxt;}cur=(cur+1)%D.deck.length;if(!pro&&cur>=15){pauseMovie();openPay();return}show(cur);next();},delay);
-}next();
-}
-function pauseMovie(){if(timer){clearTimeout(timer);timer=null;}if(synth)synth.cancel();let p=document.getElementById('player');if(p)p.classList.remove('playing');}
+function playMovie(){if(!D.deck.length)return;clearTimeout(timer);function nxt(){let d=D.deck[cur];let delay=Math.max(5000,(d.dialogues[0]?d.dialogues[0].text.length*80:4000));timer=setTimeout(()=>{cur=(cur+1)%D.deck.length;show(cur);nxt();},delay);}show(cur);nxt();}
+function pauseMovie(){clearTimeout(timer);let a=document.getElementById('aud');if(a){a.pause();}if(synth)synth.cancel();}
 function nextScene(){show((cur+1)%D.deck.length);}
-function castMovie(){alert('Cast to TV: Same WiFi, Chrome > 3 dots > Cast > TV');}
+function toggleVoice(){voiceOn=!voiceOn;document.getElementById('vLab').textContent=voiceOn?'ON':'OFF';if(!voiceOn)pauseMovie();}
 </script>
 </body>
 </html>
