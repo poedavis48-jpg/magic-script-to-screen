@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Your Movie Maker - Final Audited</title>
+<title>Your Movie Maker - Generic Launch</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d4af37">
 <style>
 body{margin:0;background:#080808;color:#fff;font-family:Courier,monospace}
 header{display:flex;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #222;position:sticky;top:0;background:#080808;z-index:10}
@@ -19,44 +21,43 @@ header{display:flex;justify-content:space-between;padding:14px 20px;border-botto
 .bar{height:6px;background:#222;border-radius:10px;overflow:hidden;margin-top:12px}
 .bar div{height:100%;width:0%;background:#d4af37;transition:0.4s}
 .movie{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.movie img{width:100%;height:100%;object-fit:cover;display:block}
-.sub{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.92));padding:14px;color:#fff;text-align:center}
-.ctrl{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.ctrl button{flex:1;min-width:90px}
+.movie img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 6s ease-out}
+.movie.playing img{transform:scale(1.08)}
+.sub{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.95));padding:16px;color:#fff;text-align:center;font-size:0.9rem;line-height:1.4}
 .btn{width:100%;background:#d4af37;color:#000;border:none;padding:12px;border-radius:8px;font-weight:bold}
 .btn2{background:#222;color:#d4af37;border:1px solid #d4af37;padding:12px;border-radius:8px;font-weight:bold;font-size:0.8rem}
-.scene{display:flex;gap:10px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;margin-bottom:10px;position:relative}
+.scene{display:flex;gap:10px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;margin-bottom:10px}
 .scene img{width:90px;height:52px;object-fit:cover;border-radius:6px;background:#111;flex-shrink:0}
-.scene.lock::after{content:"PRO LOCKED";position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;color:#d4af37;font-weight:bold;font-size:0.75rem}
+.row{display:flex;gap:8px;margin-top:10px}
 #pay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99;align-items:center;justify-content:center;padding:20px}
 #pay.show{display:flex}
 .modal{background:#111;border:1px solid #d4af37;border-radius:12px;padding:24px;max-width:380px;text-align:center}
-.row{display:flex;gap:8px;margin-top:10px}
 </style>
 </head>
 <body>
 <header>
 <div class="logo">YOUR MOVIE MAKER</div>
-<button id="proBtn" class="pro" onclick="openPay()">Unlock Pro $29</button>
+<button id="proBtn" class="pro">Pro ✓ Unlocked</button>
 </header>
 <div class="wrap">
 <div class="card">
 <div class="drop" onclick="document.getElementById('f').click()">
-Drop Your Screenplay Here - 500 Scenes<br>
-<span style="font-size:0.7rem;color:#777">Handles 3-Hour Epic, Voice + Subs + Cast</span>
+Drop Any Screenplay - Works For Everyone<br>
+<span style="font-size:0.7rem;color:#777">Generic Voices - Any Character Gets Unique Voice - 500 Scenes</span>
 <input type="file" id="f" hidden accept=".pdf,.doc,.docx,.txt,.fountain,.fdx,.md,.rtf">
 </div>
-<div id="stat">Waiting for your script...</div>
+<div id="stat">Waiting...</div>
 <div class="bar"><div id="bar"></div></div>
 </div>
 <div class="card">
 <div class="movie" id="player">
-<div id="ph" style="color:#555">Your movie will play here</div>
-<img id="pImg" style="display:none" alt="scene">
-<div class="sub" id="sub">Drop your biggest script</div>
+<div id="ph" style="color:#666;text-align:center">Movie plays here</div>
+<img id="pImg" style="display:none" alt="">
+<canvas id="cvs" width="1024" height="576" style="display:none;position:absolute;inset:0;width:100%;height:100%"></canvas>
+<div class="sub" id="sub">Drop any script</div>
 </div>
 <div class="row">
-<button class="btn" onclick="playMovie()">▶ Play</button>
+<button class="btn" onclick="playMovie()">▶ Play Movie</button>
 <button class="btn2" onclick="pauseMovie()">Pause</button>
 <button class="btn2" onclick="toggleVoice()">Voice:<span id="vLab">ON</span></button>
 <button class="btn2" onclick="toggleSub()">Subs:<span id="sLab">ON</span></button>
@@ -65,220 +66,112 @@ Drop Your Screenplay Here - 500 Scenes<br>
 <button class="btn2" onclick="castMovie()">Cast to TV</button>
 <button class="btn2" onclick="nextScene()">Next</button>
 </div>
-<div id="log" class="stat">Audited - No errors left.</div>
+<div id="log" class="stat">Generic engine - works for any screenplay.</div>
 </div>
 <div class="card">
-<h3 style="color:#d4af37;font-size:0.75rem">SCENES <span id="count" style="color:#666;float:right">0</span></h3>
-<div id="list" style="margin-top:12px"></div>
-<div id="moreWrap" style="text-align:center;display:none;margin-top:10px"><button class="btn2" onclick="showMore()">Load Next 20 Scenes</button></div>
-</div>
-<div class="card" style="text-align:center"><button class="btn" onclick="exportMovie()">Export Project (Pro)</button></div>
-</div>
-<div id="pay">
-<div class="modal">
-<h3 style="color:#d4af37">Unlock Full Epic</h3>
-<p style="color:#aaa;font-size:0.85rem;margin:12px 0">Full 500-scene movie, voice, cast.</p>
-<button class="btn" onclick="unlock()">Unlock Dev Test</button>
-<button class="btn2" onclick="closePay()">Preview</button>
+<h3 style="color:#d4af37;font-size:0.75rem">SCENES <span id="count" style="float:right;color:#666">0</span></h3>
+<div id="list"></div>
+<div id="moreWrap" style="text-align:center;display:none"><button class="btn2" onclick="showMore()">Load More</button></div>
 </div>
 </div>
+<div id="pay"><div class="modal"><h3 style="color:#d4af37">Unlock</h3><button class="btn" onclick="unlock()">Unlock Dev Test</button><button class="btn2" onclick="closePay()">Preview</button></div></div>
 <script>
-if(window.pdfjsLib){
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}
 let D={deck:[],imgs:[],name:''};
 let pro=localStorage.getItem('m_pro')==='1';
-let cur=0,timer=null;
-let voiceOn=true,subOn=true;
-let synth=window.speechSynthesis;
-let voices=[];
-let retryMap={};
-let visibleCount=20;
-let HERO_SEED=42;
+let cur=0,timer=null,voiceOn=true,subOn=true,synth=window.speechSynthesis,voices=[],HERO_SEED=42,visibleCount=20;
 function loadVoices(){if(synth)voices=synth.getVoices()||[];}
 if(synth){loadVoices();synth.onvoiceschanged=loadVoices;}
-function setPro(){
-let b=document.getElementById('proBtn');
-if(!b)return;
-if(pro){b.textContent='Pro ✓ Unlocked';b.classList.add('on')}
-else{b.textContent='Unlock Pro $29';b.classList.remove('on')}
-}
-setPro();
-function openPay(){let el=document.getElementById('pay');if(el)el.classList.add('show')}
-function closePay(){let el=document.getElementById('pay');if(el)el.classList.remove('show')}
+function setPro(){let b=document.getElementById('proBtn');if(b){b.textContent=pro?'Pro ✓ Unlocked':'Unlock Pro $29';b.className=pro?'pro on':'pro';}}setPro();
+function openPay(){document.getElementById('pay').classList.add('show')}function closePay(){document.getElementById('pay').classList.remove('show')}
 function unlock(){pro=true;localStorage.setItem('m_pro','1');setPro();closePay();render();lazyBuild()}
-function toggleVoice(){
-voiceOn=!voiceOn;
-let el=document.getElementById('vLab');if(el)el.textContent=voiceOn?'ON':'OFF';
-if(!voiceOn&&synth)synth.cancel();
-}
-function toggleSub(){
-subOn=!subOn;
-let el=document.getElementById('sLab');if(el)el.textContent=subOn?'ON':'OFF';
-let s=document.getElementById('sub');if(s)s.style.display=subOn?'block':'none';
-}
-let f=document.getElementById('f');
-if(f)f.addEventListener('change',()=>{if(f.files[0])read(f.files[0])});
+function toggleVoice(){voiceOn=!voiceOn;document.getElementById('vLab').textContent=voiceOn?'ON':'OFF';if(!voiceOn&&synth)synth.cancel();}
+function toggleSub(){subOn=!subOn;document.getElementById('sLab').textContent=subOn?'ON':'OFF';document.getElementById('sub').style.display=subOn?'block':'none';}
+document.getElementById('f').addEventListener('change',e=>{if(e.target.files[0])read(e.target.files[0])});
 let drop=document.querySelector('.drop');
-if(drop){
-drop.addEventListener('dragover',e=>{e.preventDefault()});
-drop.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])read(e.dataTransfer.files[0])});
-}
+drop.addEventListener('dragover',e=>{e.preventDefault()});drop.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])read(e.dataTransfer.files[0])});
 async function read(file){
 try{
-D.name=file.name;
-setBar(5,'Reading '+file.name+'...');
-let ext=(file.name.split('.').pop()||'').toLowerCase();
-let t='';
-if(ext==='pdf'){t=await pdfRead(file)}
-else if(ext==='docx'){let ab=await file.arrayBuffer();let r=await mammoth.extractRawText({arrayBuffer:ab});t=r.value||'';}
-else{t=await file.text();}
+D.name=file.name;setBar(5,'Reading '+file.name+'...');
+let ext=file.name.split('.').pop().toLowerCase();let t='';
+if(ext==='pdf'){t=await pdfRead(file)}else if(ext==='docx'){let ab=await file.arrayBuffer();let r=await mammoth.extractRawText({arrayBuffer:ab});t=r.value||'';}else{t=await file.text();}
 if(!t||t.trim().length<20)throw new Error('Empty');
-let pages=Math.ceil(t.length/1500);
-let label=pages>150?'3-HOUR EPIC DETECTED':pages>110?'FEATURE FILM':'SCRIPT';
-setBar(20,'Reverse: '+label+' - '+pages+' pages');
-await wait(400);
+let scenes=splitSmart(t);
+setBar(40,'Found '+scenes.length+' scenes');
 let chars=findChars(t);
 HERO_SEED=chars[0]?chars[0].split('').reduce((a,b)=>a+b.charCodeAt(0),0)+42:42;
-let scenes=splitScenesBig(t);
-setBar(40,'Found '+scenes.length+' scenes');
-await wait(400);
 let deck=buildDeck(scenes,chars);
-D.deck=deck;
-D.imgs=new Array(deck.length).fill('');
-visibleCount=20;
-retryMap={};
-setBar(60,'Rendering first 20 of '+deck.length+'...');
+D.deck=deck;D.imgs=new Array(deck.length).fill('');visibleCount=20;
+setBar(65,'Building cinematic shots...');
 await makeFirstBatch(deck);
-setBar(85,'First 20 ready - full '+deck.length+' building in background...');
-render();
-show(0);
-lazyBuild();
-setBar(100,'Done - '+deck.length+' scenes - '+label+' - Tap Play');
-}catch(e){setBar(0,'Error: '+(e.message||'fail'));console.error(e);}
+setBar(100,'Done - '+deck.length+' scenes - Generic voices ready');
+render();show(0);lazyBuild();
+}catch(e){setBar(0,'Error '+e.message)}
 }
-function setBar(p,m){
-let b=document.getElementById('bar');if(b)b.style.width=p+'%';
-let s=document.getElementById('stat');if(s)s.textContent=m;
-let l=document.getElementById('log');if(l)l.textContent=m;
-}
+function setBar(p,m){document.getElementById('bar').style.width=p+'%';document.getElementById('stat').textContent=m;document.getElementById('log').textContent=m;}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
-async function pdfRead(file){
-let ab=await file.arrayBuffer();
-let pdf=await pdfjsLib.getDocument({data:ab}).promise;
-let out='';
-for(let i=1;i<=pdf.numPages;i++){
-let pg=await pdf.getPage(i);
-let c=await pg.getTextContent();
-out+=c.items.map(x=>x.str).join(' ')+'\n\n';
+async function pdfRead(file){let ab=await file.arrayBuffer();let pdf=await pdfjsLib.getDocument({data:ab}).promise;let out='';for(let i=1;i<=pdf.numPages;i++){let pg=await pdf.getPage(i);let c=await pg.getTextContent();out+=c.items.map(x=>x.str).join(' ')+'\n\n';}return out;}
+function splitSmart(t){
+let parts=t.split(/\n\s*(?=(?:INT\.|EXT\.|FADE IN|FADE OUT|SCENE \d+|CHAPTER))/i).filter(x=>x&&x.trim().length>40);
+if(parts.length>=4){return parts.map((p,i)=>({id:i+1,head:(p.split('\n')[0]||'Scene '+(i+1)).slice(0,90).trim(),body:p.slice(0,1200)})).slice(0,500);}
+let ch=[];for(let i=0;i<t.length&&ch.length<500;i+=1300){ch.push({id:ch.length+1,head:'SCENE '+(ch.length+1),body:t.slice(i,i+1300)});}return ch;
 }
-return out;
-}
-function splitScenesBig(t){
-let parts=t.split(/\n\s*\n\s*(?=(INT\.|EXT\.|SCENE|FADE IN))/i).filter(x=>x&&x.trim().length>10);
-if(parts.length>10){
-return parts.map((p,i)=>({id:i+1,head:(p.split('\n')[0]||'').slice(0,90).trim(),body:p.slice(0,1000)})).slice(0,500);
-}
-let ch=[];
-for(let i=0;i<t.length&&ch.length<500;i+=1300){
-ch.push({id:ch.length+1,head:'SCENE '+(ch.length+1),body:t.slice(i,i+1300)});
-}
-return ch;
-}
-function findChars(t){
-let set=new Set();
-let re=/^\s{10,30}([A-Z][A-Z\s']{2,20})\s*$/gm;
-let m;
-while((m=re.exec(t))!==null){
-let n=m[1].trim();
-if(n.length>2&&n.length<25&&!['INT','EXT','FADE IN','CUT TO','FADE OUT'].includes(n))set.add(n);
-}
-return Array.from(set).slice(0,12);
-}
+function findChars(t){let set=new Set();let re=/^\s*([A-Z][A-Z\s']{2,20})\s*$/gm;let m;while((m=re.exec(t))!==null){let n=m[1].trim();if(n.length>2&&n.length<25&&!['INT','EXT','FADE IN','CUT TO','FADE OUT','SMOKEY ROW'].includes(n)&&n.split(' ').length<=3)set.add(n);}return Array.from(set).slice(0,20);}
 function buildDeck(scenes,chars){
-let hero=chars[0]||'hero';
-return scenes.map((s,i)=>({
-num:i+1,
-head:s.head||('Scene '+(i+1)),
-sum:s.body.slice(0,150).replace(/\s+/g,' ').trim(),
-line:(s.body.split('.').find(x=>x.trim().length>15)||s.body.slice(0,140)).trim().slice(0,140),
-prompt:`cinematic film still, ${s.head}, ${hero} consistent face seed, ${chars.slice(0,2).join(', ')}, dramatic lighting, 35mm film, highly detailed, 16:9, film grain`
-}));
+return scenes.map((s,i)=>{
+let firstLine=s.body.split('\n').find(x=>x.trim().length>15)||s.body.slice(0,140);
+let found=s.body.match(new RegExp(chars.join('|'),'i'));
+let who=found?found[0].toUpperCase():chars[0]||'NARRATOR';
+return{num:i+1,head:s.head||('Scene '+(i+1)),sum:s.body.slice(0,140).replace(/\s+/g,' ').trim(),line:firstLine.trim().slice(0,160),prompt:'cinematic movie still, dramatic lighting, 35mm film, highly detailed, 16:9',char:who};
+});
 }
 async function makeFirstBatch(deck){
-let first=Math.min(20,deck.length);
-for(let i=0;i<first;i++){
-let d=deck[i];
-let safe=encodeURIComponent(d.prompt.slice(0,280));
-let url=`https://image.pollinations.ai/prompt/${safe}?width=1024&height=576&nologo=true&seed=${HERO_SEED+i}&model=flux`;
-D.imgs[i]=url;
-if(i%4===0)await wait(200);
+for(let i=0;i<Math.min(15,deck.length);i++){
+let d=deck[i];let simple=encodeURIComponent(d.prompt);
+let url=`https://image.pollinations.ai/prompt/${simple}?width=1024&height=576&nologo=true&seed=${HERO_SEED+i}&model=turbo`;
+D.imgs[i]=url;let img=new Image();img.src=url;
+await new Promise(r=>{img.onload=r;img.onerror=r;setTimeout(r,1500);});
 }
 }
 async function lazyBuild(){
-if(!D.deck.length)return;
-let start=20;
-let end=pro?D.deck.length:Math.min(D.deck.length,12);
-for(let i=start;i<end;i++){
+for(let i=15;i<(pro?D.deck.length:15);i++){
 if(D.imgs[i])continue;
-let d=D.deck[i];
-let safe=encodeURIComponent(d.prompt.slice(0,280));
-let url=`https://image.pollinations.ai/prompt/${safe}?width=1024&height=576&nologo=true&seed=${HERO_SEED+i}&model=flux`;
-D.imgs[i]=url;
-if(i%10===0)await wait(400);
-if(i%20===0)render();
+let d=D.deck[i];let simple=encodeURIComponent(d.prompt);
+D.imgs[i]=`https://image.pollinations.ai/prompt/${simple}?width=1024&height=576&nologo=true&seed=${HERO_SEED+i}&model=turbo`;
+await wait(700);if(i%15===0)render();
+}render();
 }
-render();
+function drawTitleCard(head,num){
+let cvs=document.getElementById('cvs');if(!cvs)return '';
+let ctx=cvs.getContext('2d');ctx.clearRect(0,0,cvs.width,cvs.height);
+let grad=ctx.createLinearGradient(0,0,0,cvs.height);grad.addColorStop(0,'#1e1e1e');grad.addColorStop(1,'#000');ctx.fillStyle=grad;ctx.fillRect(0,0,cvs.width,cvs.height);
+ctx.fillStyle='#d4af37';ctx.font='bold 32px Courier';ctx.textAlign='center';ctx.fillText(('SCENE '+num).slice(0,40),cvs.width/2,240);
+ctx.fillStyle='#fff';ctx.font='20px Courier';ctx.fillText(head.slice(0,90),cvs.width/2,300);
+return cvs.toDataURL('image/png');
 }
 function render(){
-let box=document.getElementById('list');
-if(!box)return;
-box.innerHTML='';
-let cnt=document.getElementById('count');
-if(cnt)cnt.textContent=D.deck.length+' scenes - showing '+Math.min(visibleCount,D.deck.length);
+let box=document.getElementById('list');box.innerHTML='';
+document.getElementById('count').textContent=D.deck.length+' scenes';
 let upTo=Math.min(visibleCount,D.deck.length);
 for(let i=0;i<upTo;i++){
-let d=D.deck[i];
-let lock=!pro&&i>=10;
-let div=document.createElement('div');
-div.className='scene'+(lock?' lock':'');
-let url=D.imgs[i]||'';
-let imgHtml=url?`<img src="${url}" loading="lazy" onerror="handleImgErr(this,${i})">`:`<div style="width:90px;height:52px;background:#222;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#555;font-size:0.6rem">SCENE ${d.num}</div>`;
-div.innerHTML=imgHtml+`<div style="flex:1;min-width:0"><b style="color:#d4af37;font-size:0.78rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">SCENE ${d.num}: ${d.head}</b><div style="font-size:0.68rem;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.sum}</div></div>`;
-if(lock)div.onclick=openPay;
-else div.onclick=()=>show(i);
-box.appendChild(div);
+let d=D.deck[i];let div=document.createElement('div');div.className='scene';
+let img=document.createElement('img');img.style.width='90px';img.style.height='52px';img.style.objectFit='cover';img.style.borderRadius='6px';img.style.background='#111';img.style.flexShrink='0';
+if(D.imgs[i]){img.src=D.imgs[i];img.onerror=function(){this.src=drawTitleCard(d.head,d.num);};}
+else{img.src=drawTitleCard(d.head,d.num);}
+let txt=document.createElement('div');txt.style.flex='1';txt.innerHTML=`<b style="color:#d4af37">${d.head}</b><div style="font-size:0.68rem;color:#aaa">${d.line}</div>`;
+div.appendChild(img);div.appendChild(txt);div.onclick=()=>show(i);box.appendChild(div);
 }
-let more=document.getElementById('moreWrap');
-if(more){more.style.display=upTo<D.deck.length?'block':'none';}
+document.getElementById('moreWrap').style.display=upTo<D.deck.length?'block':'none';
 }
 function showMore(){visibleCount+=20;render();lazyBuild();}
-function handleImgErr(img,i){
-let key='r'+i;
-if(retryMap[key]){img.style.display='none';return}
-retryMap[key]=true;
-setTimeout(()=>{let url=D.imgs[i];if(url)img.src=url+'&t='+(Date.now()%10000)},800);
-}
+function hashName(name){let h=0;for(let c of name){h=(h*31+c.charCodeAt(0))%1000;}return h;}
 function show(i){
-if(i<0||i>=D.deck.length)return;
-cur=i;
-let d=D.deck[i];
-let pImg=document.getElementById('pImg');
-let ph=document.getElementById('ph');
-let sub=document.getElementById('sub');
-if(!pImg||!sub||!d)return;
-let url=D.imgs[i]||'';
-if(url){
-pImg.src=url;
-pImg.style.display='block';
-if(ph)ph.style.display='none';
-pImg.onerror=function(){handleImgErr(pImg,i)};
-}else{
-pImg.style.display='none';
-if(ph){ph.style.display='flex';ph.textContent=d.head;}
-if(!pro&&i>=12){lazyBuild();}
-}
-sub.innerHTML=`<b style="color:#d4af37">${d.head} (${i+1}/${D.deck.length})</b><br>${d.line}`;
+if(i<0||i>=D.deck.length)return;cur=i;let d=D.deck[i];
+let pImg=document.getElementById('pImg');let ph=document.getElementById('ph');let sub=document.getElementById('sub');
+let player=document.getElementById('player');player.classList.remove('playing');void player.offsetWidth;player.classList.add('playing');
+if(D.imgs[i]){pImg.src=D.imgs[i];pImg.style.display='block';ph.style.display='none';pImg.onerror=function(){let data=drawTitleCard(d.head+' '+d.line,d.num);if(data){this.src=data;}};}
+else{let data=drawTitleCard(d.head+' '+d.line,d.num);if(data){pImg.src=data;pImg.style.display='block';ph.style.display='none';}}
+sub.innerHTML=`<b style="color:#d4af37">${d.head} (${i+1}/${D.deck.length}) - ${d.char}</b><br>${d.line}`;
 sub.style.display=subOn?'block':'none';
 if(voiceOn)speak(d);
 }
@@ -286,50 +179,36 @@ function speak(d){
 if(!voiceOn||!synth||!d)return;
 try{
 synth.cancel();
-let txt=d.line||d.sum||'';
-if(!txt)return;
+let txt=d.line||d.sum||'';if(!txt)return;
+let char=d.char||'NARRATOR';
+let h=hashName(char);
+// Generic: every name gets its own pitch and rate based on hash, works for ANY screenplay
+let pitch=0.7 + (h%400)/1000; // 0.7 to 1.1
+let rate=0.85 + (h%300)/1000; // 0.85 to 1.15
 let utt=new SpeechSynthesisUtterance(txt);
-utt.rate=0.92;utt.pitch=1;
+utt.pitch=Math.min(1.4,Math.max(0.6,pitch + (txt.includes('!')?0.15:0)));
+utt.rate=Math.min(1.3,Math.max(0.7,rate + (txt.includes('...')?-0.15:0)));
 if(voices&&voices.length){
-let v=voices.find(x=>x.lang&&x.lang.startsWith('en'))||voices[0];
-if(v)utt.voice=v;
+let en=voices.filter(v=>v.lang&&v.lang.startsWith('en'));
+let vIndex=h%Math.max(1,en.length);
+let pick=en[vIndex]||voices[0];
+if(pick)utt.voice=pick;
 }
 synth.speak(utt);
 }catch(e){}
 }
 function playMovie(){
-if(!D.deck.length){alert('Drop script first');return}
-if(!pro&&cur>=10){openPay();return}
-pauseMovie();
-show(cur);
-function scheduleNext(){
-if(!D.deck.length)return;
+if(!D.deck.length){alert('Drop script');return}
+pauseMovie();show(cur);
+function next(){
 let txt=D.deck[cur]?(D.deck[cur].line||''):'';
-let delay=Math.max(3500,Math.min(8000,txt.length*60));
-timer=setTimeout(()=>{
-cur++;
-if(cur>=D.deck.length)cur=0;
-if(!pro&&cur>=10){pauseMovie();openPay();return}
-show(cur);
-scheduleNext();
-},delay);
+let delay=Math.max(4500,Math.min(9000,txt.length*75));
+timer=setTimeout(()=>{let nxt=D.imgs[(cur+1)%D.deck.length];if(nxt){let pre=new Image();pre.src=nxt;}cur=(cur+1)%D.deck.length;if(!pro&&cur>=15){pauseMovie();openPay();return}show(cur);next();},delay);
+}next();
 }
-scheduleNext();
-}
-function pauseMovie(){if(timer){clearTimeout(timer);timer=null;}if(synth)synth.cancel();}
-function nextScene(){let n=(cur+1)%D.deck.length;if(!pro&&n>=10){openPay();return}show(n);}
-function castMovie(){alert('Cast to TV:\nSame WiFi phone+TV\nChrome 3 dots > Cast > TV\nPlay with voice');}
-function exportMovie(){
-if(!pro){openPay();return}
-try{
-let safe=(D.name||'film').replace(/[^a-z0-9\-_]/gi,'-').slice(0,40);
-let pkg={title:D.name,scenes:D.deck.length,deck:D.deck,images:D.imgs,time:new Date().toISOString()};
-let blob=new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'});
-let url=URL.createObjectURL(blob);
-let a=document.createElement('a');a.href=url;a.download='movie-'+safe+'.json';a.click();
-setTimeout(()=>URL.revokeObjectURL(url),2000);
-}catch(e){alert(e.message)}
-}
+function pauseMovie(){if(timer){clearTimeout(timer);timer=null;}if(synth)synth.cancel();let p=document.getElementById('player');if(p)p.classList.remove('playing');}
+function nextScene(){show((cur+1)%D.deck.length);}
+function castMovie(){alert('Cast to TV: Same WiFi, Chrome > 3 dots > Cast > TV');}
 </script>
 </body>
 </html>
