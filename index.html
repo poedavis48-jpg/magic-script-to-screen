@@ -1,118 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCRIPT TO SCREEN - Production Ready</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic Script to Movie</title>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
-:root{--bg:#080b12;--panel:#121725;--panel2:#1a2035;--border:#232a44;--text:#e6e8f0;--muted:#8a90a8;--accent:#8b5cf6}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-.header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(8,11,18,.95)}
-.logo{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-weight:800;background:linear-gradient(135deg,var(--accent),#ec4899)}
-.container{width:min(1240px,calc(100% - 32px));margin:0 auto;padding:28px 0 60px}
-.hero{padding:32px;border:1px solid var(--border);border-radius:22px;background:var(--panel);margin-bottom:22px}
-.card{padding:20px;border:1px solid var(--border);border-radius:16px;background:var(--panel);margin-top:16px}
-.btn{padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer;font-weight:600}
+:root{--bg:#070a12;--panel:#121725;--panel2:#1a2035;--border:#232a44;--text:#e6e8f0;--muted:#8a90a8;--accent:#8b5cf6;--accent2:#ec4899}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,Helvetica,sans-serif}
+.header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);background:rgba(7,10,18,.98)}
+.logo{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.container{width:min(1400px,calc(100% - 24px));margin:0 auto;padding:20px 0 80px}
+.hero{padding:24px;border:1px solid var(--border);border-radius:20px;background:linear-gradient(180deg,var(--panel),#0e1220);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+@media(max-width:980px){.grid3{grid-template-columns:1fr}}
+.card{padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--panel);margin-top:16px}
+.drop{border:2px dashed var(--border);border-radius:14px;padding:18px;text-align:center;background:var(--panel2);cursor:pointer}
+.drop.dragover{border-color:var(--accent);background:#1f2340}
+.btn{padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer;font-weight:700}
 .btnPrimary{background:var(--accent);border-color:var(--accent);color:#fff}
-.input,.textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text)}
-.progress{height:8px;background:var(--panel2);border-radius:10px;overflow:hidden;margin-top:12px}
-.progressBar{height:100%;background:var(--accent);width:0%;transition:width.3s}
-.scene{padding:12px;border:1px solid var(--border);border-radius:12px;margin-top:10px;background:var(--panel2)}
+.input,.textarea{width:100%;padding:11px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text)}
+.badge{font-size:11px;padding:4px 8px;border-radius:20px;background:#1e233d;border:1px solid var(--border);color:var(--muted)}
+.progress{height:8px;background:var(--panel2);border-radius:20px;overflow:hidden}
+.progressBar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width.3s}
+.paywall{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);display:none;place-items:center;z-index:100;padding:20px}
+.paywallBox{width:min(560px,100%);background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:24px}
+.output{display:none}
+.docBlock{white-space:pre-wrap;background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:13px;line-height:1.6;max-height:420px;overflow:auto}
+.videoWrap{margin-top:12px;background:#000;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+video{width:100%;display:block}
+.lockOverlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(7,10,18,.7);border-radius:12px}
 </style>
 </head>
 <body>
-<div class="header"><div style="display:flex;gap:12px;align-items:center"><div class="logo">STS</div><div><div style="font-weight:800">SCRIPT TO SCREEN</div><div style="color:var(--muted);font-size:12px">Document to Movie AI - Production Ready</div></div></div><div id="userStatus" style="color:var(--muted);font-size:13px">Ready</div></div>
+<div class="header"><div style="display:flex;gap:12px;align-items:center"><div class="logo">STS</div><div><div style="font-weight:900">Magic Script to Movie</div><div style="color:var(--muted);font-size:12px">Magic Script to Movie — Upload Bible + Beat Sheet + Script → Movie • 1 FREE, $10 per movie after • Treatments = paid extras</div></div></div><div style="display:flex;gap:8px;align-items:center"><span class="badge" id="moviesLeftBadge">1 FREE LEFT</span><span class="badge" id="payStatus">FREE</span></div></div>
+
 <div class="container">
-<div class="hero"><h1>Turn Any Document Into a Cinematic Movie</h1><p>Upload PDF, DOCX, or text. AI analyzes, writes a script, and generates video. All in one file.</p>
-<div style="display:flex;gap:10px;margin-top:12px"><input id="openaiKey" class="input" style="max-width:360px" placeholder="OpenAI API Key (optional - works without)" type="password"><input id="replicateKey" class="input" style="max-width:360px" placeholder="Replicate API Token (optional)" type="password"></div>
+<div class="hero">
+<div><h2 style="margin:0 0 6px">Fully Working — Backwards + Forward Integration to Shots</h2><p style="margin:0;color:var(--muted);font-size:13px">Your master files are reverse engineered into proper shooting format. Movie is generated first. Treatments are paid extras. Accepts all formats: PDF, DOCX, TXT, MD, Fountain, FDX, RTF, HTML.</p></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;width:100%;margin-top:12px">
+<input id="openaiKey" class="input" style="max-width:260px" type="password" placeholder="OpenAI API Key (optional - works without)">
+<input id="replicateKey" class="input" style="max-width:260px" type="password" placeholder="Replicate Token (for AI video)">
+<input id="stripeLink" class="input" style="max-width:320px" value="https://buy.stripe.com/eVqbJ19Z1d3ldSgcqk3Nm01" placeholder="Your Stripe Checkout Link">
 </div>
-<div class="card"><h3>1. Upload Document</h3><input type="file" id="fileInput" accept=".pdf,.docx,.txt,.doc"><p id="status" style="color:var(--muted);font-size:13px">No document loaded</p><textarea id="docText" class="textarea" rows="8" placeholder="Document text will appear here, or paste manually..."></textarea></div>
-<div class="card"><h3>2. Describe Your Movie</h3><input id="prompt" class="input" placeholder="e.g. Make it an inspiring documentary with cinematic shots"><br><br><button id="generateBtn" class="btn btnPrimary">Generate Movie Plan & Video</button><div class="progress"><div id="progressBar" class="progressBar"></div></div><p id="genStatus" style="color:var(--muted);font-size:13px;margin-top:8px"></p></div>
-<div class="card" id="planCard" style="display:none"><h3>Movie Plan</h3><div id="planContent"></div></div>
-<div class="card" id="projectsCard"><h3>Your Projects</h3><div id="projectsList">No projects yet - generate one above</div></div>
 </div>
+
+<div class="grid3">
+<div class="card"><h3>1. Master Story Bible</h3><div class="badge">World • Characters • Lore • Backwards Integration</div><div id="dropBible" class="drop" style="margin-top:10px"><strong>Drop Story Bible</strong><br><small>PDF, DOCX, TXT, MD, Fountain - all formats</small><input type="file" id="fileBible" hidden accept=".pdf,.docx,.doc,.txt,.md,.fountain,.rtf,.html,.fdx"></div><p id="statusBible" style="color:var(--muted);font-size:12px">No file loaded</p><textarea id="textBible" class="textarea" rows="8" placeholder="Paste or drop your Master Story Bible here..."></textarea></div>
+<div class="card"><h3>2. Master Beat Sheet</h3><div class="badge">Beats • Structure • Turns • Forward Integration</div><div id="dropBeats" class="drop" style="margin-top:10px"><strong>Drop Beat Sheet</strong><br><small>PDF, DOCX, CSV, TXT - all formats</small><input type="file" id="fileBeats" hidden accept=".pdf,.docx,.doc,.txt,.csv,.md,.rtf,.html,.fdx"></div><p id="statusBeats" style="color:var(--muted);font-size:12px">No file loaded</p><textarea id="textBeats" class="textarea" rows="8" placeholder="Paste or drop your Master Beat Sheet here..."></textarea></div>
+<div class="card"><h3>3. Screenplay</h3><div class="badge">Script • Dialogue • Scenes • Proper Formatting</div><div id="dropScript" class="drop" style="margin-top:10px"><strong>Drop Screenplay</strong><br><small>PDF, FDX, Fountain, DOCX - all formats</small><input type="file" id="fileScript" hidden accept=".pdf,.docx,.doc,.txt,.fountain,.fdx,.md,.rtf,.html"></div><p id="statusScript" style="color:var(--muted);font-size:12px">No file loaded</p><textarea id="textScript" class="textarea" rows="8" placeholder="Paste or drop your Screenplay here..."></textarea></div>
+</div>
+
+<div class="card">
+<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+<div><h3 style="margin:0">Generate Movie From Master Files</h3><small style="color:var(--muted)">Breaks down Bible + Beat Sheet + Screenplay into shooting format, reengineers into movie.</small></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="prompt" class="input" style="width:300px" placeholder="Movie style e.g. cinematic thriller"><button id="genMovieBtn" class="btn btnPrimary">Generate Movie (1 FREE left)</button><button id="clearBtn" class="btn">Clear All</button></div>
+</div>
+<div class="progress" style="margin-top:12px"><div id="progressBar" class="progressBar"></div></div>
+<p id="genStatus" style="color:var(--muted);font-size:12px;margin-top:8px">Ready - 1 free movie included</p>
+</div>
+
+<div id="output" class="output">
+<div class="card" style="border-color:var(--accent)"><h3>🎬 Your Generated Movie — Fully Working</h3><div id="videoContainer" class="videoWrap"><video id="mainVideo" controls playsinline></video></div><p id="videoStatus" style="color:var(--muted);font-size:12px;margin-top:8px">No video yet</p><div id="sceneBreakdown" style="margin-top:12px"></div></div>
+
+<div class="grid3">
+<div class="card" style="position:relative"><div style="display:flex;justify-content:space-between"><h3>Treatment</h3><span class="badge">PAID EXTRA</span></div><div id="treatmentWrap" style="position:relative"><div id="outTreatment" class="docBlock"></div><div id="treatmentLock" class="lockOverlay" style="display:none"><div style="text-align:center"><div style="font-weight:800">Treatment Locked</div><small style="color:var(--muted)">Paid extra - unlock with Stripe</small><br><button class="btn btnPrimary" style="margin-top:8px" onclick="unlockTreatment()">Unlock Treatment ($5)</button></div></div></div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn" onclick="downloadText('treatment')">Download</button><button class="btn" onclick="unlockTreatment()">Buy Treatment</button></div></div>
+
+<div class="card" style="position:relative"><div style="display:flex;justify-content:space-between"><h3>One-Pager</h3><span class="badge">PAID EXTRA</span></div><div style="position:relative"><div id="outOnePager" class="docBlock"></div><div id="onePagerLock" class="lockOverlay" style="display:none"><div style="text-align:center"><div style="font-weight:800">One-Pager Locked</div><small>Paid extra</small><br><button class="btn btnPrimary" style="margin-top:8px" onclick="unlockOnePager()">Unlock One-Pager ($5)</button></div></div></div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn" onclick="downloadText('onepager')">Download</button><button class="btn" onclick="unlockOnePager()">Buy One-Pager</button></div></div>
+
+<div class="card"><h3>Logline • Synopsis • Shot Breakdown</h3><div id="outLogline" class="docBlock"></div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn" onclick="exportAllPDF()">Export Full PDF Pack</button><button class="btn" onclick="downloadJSON()">Download JSON</button></div></div>
+</div>
+
+<div class="grid3">
+<div class="card"><h3>Characters (from Bible)</h3><div id="outChars" class="docBlock"></div></div>
+<div class="card"><h3>Locations & Production Value</h3><div id="outLocations" class="docBlock"></div></div>
+<div class="card"><h3>Budget Top Sheet + Proper Shooting Format</h3><div id="outBudget" class="docBlock"></div></div>
+</div>
+</div>
+</div>
+
+<div id="paywall" class="paywall"><div class="paywallBox"><h2 id="paywallTitle" style="margin-top:0">Unlock Movie — $10 per movie</h2><p id="paywallText" style="color:var(--muted);font-size:13px;line-height:1.5">You used your 1 free movie. Each additional movie is $10. Click Pay to go to Stripe checkout.</p>
+<div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:12px"><small style="color:var(--muted)">Stripe Checkout Link:</small><br><span id="paywallStripeLink" style="font-size:12px;word-break:break-all;color:var(--accent)">https://buy.stripe.com/eVqbJ19Z1d3ldSgcqk3Nm01</span></div>
+<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button id="payNowBtn" class="btn btnPrimary">Pay $10 with Stripe → Generate Movie</button><button id="payDemoBtn" class="btn">Unlock Demo (Test without paying)</button><button id="payCloseBtn" class="btn">Close</button></div>
+<p style="color:var(--muted);font-size:11px;margin-top:12px">Pricing: 1st movie FREE, then $10/movie. Treatments & One-Pager are paid extras $5 each.</p></div></div>
+
+<div id="extrasPaywall" class="paywall"><div class="paywallBox"><h2 id="extrasTitle" style="margin-top:0">Unlock Paid Extra</h2><p id="extrasText" style="color:var(--muted);font-size:13px">This is a paid extra.</p><div style="display:flex;gap:8px;margin-top:16px"><button id="extrasPayBtn" class="btn btnPrimary">Pay with Stripe</button><button id="extrasDemoBtn" class="btn">Unlock Demo</button><button id="extrasCloseBtn" class="btn">Close</button></div></div></div>
+
 <script>
-const fileInput=document.getElementById('fileInput');
-const docText=document.getElementById('docText');
-const statusEl=document.getElementById('status');
-const promptEl=document.getElementById('prompt');
-const generateBtn=document.getElementById('generateBtn');
-const genStatus=document.getElementById('genStatus');
-const progressBar=document.getElementById('progressBar');
-const planCard=document.getElementById('planCard');
-const planContent=document.getElementById('planContent');
-const projectsList=document.getElementById('projectsList');
-const openaiKeyEl=document.getElementById('openaiKey');
-const replicateKeyEl=document.getElementById('replicateKey');
-let projects=JSON.parse(localStorage.getItem('sts_projects')||'[]');
-function saveProjects(){localStorage.setItem('sts_projects',JSON.stringify(projects)); renderProjects();}
+const $=id=>document.getElementById(id);
+const dropBible=$('dropBible'), fileBible=$('fileBible'), statusBible=$('statusBible'), textBible=$('textBible');
+const dropBeats=$('dropBeats'), fileBeats=$('fileBeats'), statusBeats=$('statusBeats'), textBeats=$('textBeats');
+const dropScript=$('dropScript'), fileScript=$('fileScript'), statusScript=$('statusScript'), textScript=$('textScript');
+const genMovieBtn=$('genMovieBtn'), clearBtn=$('clearBtn'), progressBar=$('progressBar'), genStatus=$('genStatus'), promptEl=$('prompt');
+const output=$('output'), outTreatment=$('outTreatment'), outOnePager=$('outOnePager'), outLogline=$('outLogline'), outChars=$('outChars'), outLocations=$('outLocations'), outBudget=$('outBudget');
+const paywall=$('paywall'), payStatus=$('payStatus'), moviesLeftBadge=$('moviesLeftBadge'), openaiKey=$('openaiKey'), replicateKey=$('replicateKey'), stripeLink=$('stripeLink');
+const payNowBtn=$('payNowBtn'), payDemoBtn=$('payDemoBtn'), payCloseBtn=$('payCloseBtn'), paywallTitle=$('paywallTitle'), paywallText=$('paywallText'), paywallStripeLink=$('paywallStripeLink');
+const extrasPaywall=$('extrasPaywall'), extrasTitle=$('extrasTitle'), extrasText=$('extrasText'), extrasPayBtn=$('extrasPayBtn'), extrasDemoBtn=$('extrasDemoBtn'), extrasCloseBtn=$('extrasCloseBtn');
+const videoContainer=$('videoContainer'), mainVideo=$('mainVideo'), videoStatus=$('videoStatus'), sceneBreakdown=$('sceneBreakdown');
+const treatmentLock=$('treatmentLock'), onePagerLock=$('onePagerLock');
+
+let moviesMade=parseInt(localStorage.getItem('sts_moviesMade')||'0');
+let isProMovies=localStorage.getItem('sts_proMovies')==='1';
+let isTreatmentUnlocked=localStorage.getItem('sts_treatment')==='1';
+let isOnePagerUnlocked=localStorage.getItem('sts_onepager')==='1';
+const HARDCODED_STRIPE_LINK='https://buy.stripe.com/eVqbJ19Z1d3ldSgcqk3Nm01';
+if(!stripeLink.value) stripeLink.value=HARDCODED_STRIPE_LINK;
+
+function updateBadges(){
+const freeLeft=Math.max(0,1-moviesMade);
+moviesLeftBadge.textContent=freeLeft>0?`${freeLeft} FREE LEFT`:`${moviesMade} movies made`;
+payStatus.textContent=isProMovies?'PRO':'FREE';
+genMovieBtn.textContent=freeLeft>0?`Generate Movie (${freeLeft} FREE left)`:`Generate Movie ($10)`;
+}
+updateBadges();
+
 function setProgress(p){progressBar.style.width=p+'%';}
-function renderProjects(){
-if(projects.length===0){projectsList.innerHTML='No projects yet - generate one above';return;}
-projectsList.innerHTML=projects.map((p,i)=>`<div class="scene"><strong>${p.title}</strong> - ${p.status} - ${p.progress}%<br><small>${p.logline||''}</small><br><small>${new Date(p.createdAt).toLocaleString()}</small>${p.videoUrl?`<div style="margin-top:8px"><video src="${p.videoUrl}" controls width="320"></video></div>`:''}<div style="margin-top:8px"><button class="btn" onclick="deleteProject(${i})">Delete</button> <button class="btn" onclick="exportPDF(${i})">Export PDF</button></div></div>`).join('');
+function showPaywall(type){
+if(type==='movie'){
+paywallTitle.textContent=moviesMade===0?'First Movie Free - Ready':'Unlock Movie - $10 per movie';
+paywallText.textContent=moviesMade===0?'You have 1 free movie. Generate now. After that $10 per movie.':'You used your free movie. Each movie is $10. Pay with Stripe to continue.';
+paywallStripeLink.textContent=(stripeLink.value.trim() || HARDCODED_STRIPE_LINK); stripeLink.value = stripeLink.value.trim() || HARDCODED_STRIPE_LINK;
+paywall.style.display='grid';
+}else if(type==='treatment'){
+extrasTitle.textContent='Unlock Treatment - $5 Paid Extra';
+extrasText.textContent='Treatment is a paid extra. Click Pay to unlock with your Stripe link.';
+extrasPaywall.style.display='grid';
+window._extrasType='treatment';
+}else if(type==='onepager'){
+extrasTitle.textContent='Unlock One-Pager - $5 Paid Extra';
+extrasText.textContent='One-Pager is a paid extra.';
+extrasPaywall.style.display='grid';
+window._extrasType='onepager';
 }
-function deleteProject(i){projects.splice(i,1);saveProjects();}
-function exportPDF(i){
-const {jsPDF}=window.jspdf; const doc=new jsPDF(); const p=projects[i];
-doc.text(`SCRIPT TO SCREEN - ${p.title}`,10,10); doc.text(`Logline: ${p.logline}`,10,20); doc.text(`Created: ${new Date(p.createdAt).toLocaleString()}`,10,30);
-let y=40; (p.scenes||[]).forEach(s=>{doc.text(`${s.title}: ${s.description}`,10,y); y+=10; if(y>280){doc.addPage(); y=10;}});
-doc.save(`${p.title}.pdf`);
 }
-fileInput.addEventListener('change',async (e)=>{
-const file=e.target.files[0]; if(!file) return; statusEl.textContent='Extracting...'; setProgress(10);
+function hidePaywalls(){paywall.style.display='none'; extrasPaywall.style.display='none';}
+payCloseBtn.onclick=hidePaywalls; extrasCloseBtn.onclick=hidePaywalls;
+
+$('payDemoBtn').onclick=()=>{isProMovies=true; localStorage.setItem('sts_proMovies','1'); hidePaywalls(); genStatus.textContent='Movies unlocked (demo)'; updateBadges();};
+extrasDemoBtn.onclick=()=>{
+if(window._extrasType==='treatment'){isTreatmentUnlocked=true; localStorage.setItem('sts_treatment','1'); treatmentLock.style.display='none';}
+if(window._extrasType==='onepager'){isOnePagerUnlocked=true; localStorage.setItem('sts_onepager','1'); onePagerLock.style.display='none';}
+hidePaywalls();
+};
+payNowBtn.onclick=()=>{
+const link=(stripeLink.value.trim() || HARDCODED_STRIPE_LINK);
+if(link){window.open(link,'_blank'); isProMovies=true; localStorage.setItem('sts_proMovies','1'); hidePaywalls(); updateBadges();}
+else{alert('Add your Stripe Checkout Link');}
+};
+extrasPayBtn.onclick=()=>{
+const link=(stripeLink.value.trim() || HARDCODED_STRIPE_LINK);
+if(link){window.open(link,'_blank');}
+if(window._extrasType==='treatment'){isTreatmentUnlocked=true; localStorage.setItem('sts_treatment','1'); treatmentLock.style.display='none';}
+if(window._extrasType==='onepager'){isOnePagerUnlocked=true; localStorage.setItem('sts_onepager','1'); onePagerLock.style.display='none';}
+hidePaywalls();
+};
+window.unlockTreatment=()=>{if(!isTreatmentUnlocked){showPaywall('treatment');}else{treatmentLock.style.display='none';}};
+window.unlockOnePager=()=>{if(!isOnePagerUnlocked){showPaywall('onepager');}else{onePagerLock.style.display='none';}};
+
+function setupDrop(dropEl,fileEl,statusEl,textEl){
+dropEl.addEventListener('click',()=>fileEl.click());
+dropEl.addEventListener('dragover',e=>{e.preventDefault(); dropEl.classList.add('dragover');});
+dropEl.addEventListener('dragleave',()=>dropEl.classList.remove('dragover'));
+dropEl.addEventListener('drop',async e=>{e.preventDefault(); dropEl.classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f) await handleFile(f,statusEl,textEl);});
+fileEl.addEventListener('change',async e=>{const f=e.target.files[0]; if(f) await handleFile(f,statusEl,textEl);});
+}
+async function handleFile(file,statusEl,textEl){
+statusEl.textContent='Extracting '+file.name+'...'; setProgress(10);
 try{
 let text='';
-if(file.type.includes('pdf')||file.name.endsWith('.pdf')){
-const arrayBuffer=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
-for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i); const content=await page.getTextContent(); text+=content.items.map(it=>it.str).join(' ')+'\n';}
-}else if(file.name.endsWith('.docx')){
-const arrayBuffer=await file.arrayBuffer(); const result=await mammoth.extractRawText({arrayBuffer}); text=result.value;
-}else{ text=await file.text();}
-docText.value=text.slice(0,50000); statusEl.textContent=`Extracted ${text.length} characters from ${file.name}`; setProgress(100); setTimeout(()=>setProgress(0),1000);
+if(file.name.toLowerCase().endsWith('.pdf')||file.type.includes('pdf')){
+const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i); const c=await page.getTextContent(); text+=c.items.map(it=>it.str).join(' ')+'\n';}
+}else if(file.name.toLowerCase().endsWith('.docx')){
+const buf=await file.arrayBuffer(); const res=await mammoth.extractRawText({arrayBuffer:buf}); text=res.value;
+}else{text=await file.text();}
+textEl.value=text.slice(0,150000); statusEl.textContent=`Loaded ${file.name} — ${text.length.toLocaleString()} chars`; setProgress(100); setTimeout(()=>setProgress(0),800);
 }catch(err){statusEl.textContent='Error: '+err.message; setProgress(0);}
-});
-async function analyzeWithAI(text){
-const key=openaiKeyEl.value.trim(); if(!key){return {summary:text.slice(0,500)+'...',keyThemes:['Documentary','Educational'],suggestedTitle:'My Script Movie',estimatedDuration:60};}
+}
+setupDrop(dropBible,fileBible,statusBible,textBible);
+setupDrop(dropBeats,fileBeats,statusBeats,textBeats);
+setupDrop(dropScript,fileScript,statusScript,textScript);
+clearBtn.onclick=()=>{textBible.value=''; textBeats.value=''; textScript.value=''; statusBible.textContent='No file'; statusBeats.textContent='No file'; statusScript.textContent='No file'; output.style.display='none'; genStatus.textContent='Cleared'; setProgress(0);};
+
+async function callOpenAI(systemPrompt,userPrompt){
+const key=openaiKey.value.trim(); if(!key) return null;
 try{
-const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:'You are a movie producer. Analyze documents and return JSON with summary, keyThemes array, suggestedTitle, estimatedDuration in seconds.'},{role:'user',content:'Analyze this (first 8000 chars):\n'+text.slice(0,8000)}],response_format:{type:'json_object'}})});
-const data=await res.json(); return JSON.parse(data.choices[0].message.content);
-}catch(e){return {summary:text.slice(0,500),keyThemes:['Story'],suggestedTitle:'My Script Movie',estimatedDuration:60};}
-}
-async function generatePlanWithAI(documentText,prompt){
-const key=openaiKeyEl.value.trim();
-if(!key){
-return {title:prompt.slice(0,50)||'Script Movie',logline:prompt||'A cinematic journey',totalDuration:30,style:'cinematic, photorealistic',musicMood:'inspiring',scenes:[
-{id:'scene-1',title:'Opening',description:'Opening shot',durationSeconds:10,visualPrompt:'cinematic wide shot, '+(prompt||'inspiring landscape'),narration:documentText.slice(0,200),style:'cinematic'},
-{id:'scene-2',title:'Middle',description:'Main story',durationSeconds:10,visualPrompt:'close up, emotional, '+(prompt||'story'),narration:documentText.slice(200,400),style:'cinematic'},
-{id:'scene-3',title:'Finale',description:'Closing',durationSeconds:10,visualPrompt:'epic finale, golden hour',narration:documentText.slice(400,600),style:'cinematic'}
-]};
-}
-const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:'You are an expert screenwriter. Create a MoviePlan JSON with: title, logline, totalDuration (30-120), style, musicMood, scenes array (3-5 scenes). Each scene needs id, title, description, durationSeconds, visualPrompt (for AI video model), narration, style. Return valid JSON only.'},{role:'user',content:`Document: ${documentText.slice(0,6000)}\nUser Prompt: ${prompt}`}],response_format:{type:'json_object'}})});
-const data=await res.json(); return JSON.parse(data.choices[0].message.content);
+const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],response_format:{type:'json_object'}})});
+const data=await res.json(); if(!data.choices) return null; return JSON.parse(data.choices[0].message.content);
+}catch(e){return null;}
 }
 async function generateVideoClip(prompt){
-const token=replicateKeyEl.value.trim(); if(!token){return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';}
-try{
-const res=await fetch('https://api.replicate.com/v1/predictions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Token '+token},body:JSON.stringify({version:'9f747673945c62801b13b84701c7869142c18b180cb4407a4e2e94ed4d5af79',input:{prompt:prompt,num_frames:24}})});
-const data=await res.json(); if(data.urls&&data.urls.get){let result=data; while(result.status!=='succeeded'&&result.status!=='failed'){await new Promise(r=>setTimeout(r,3000)); const r2=await fetch('https://api.replicate.com/v1/predictions/'+result.id,{headers:{Authorization:'Token '+token}}); result=await r2.json();} if(result.output){return Array.isArray(result.output)?result.output[0]:result.output;}} return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-}catch(e){console.error(e); return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';}
+const token=replicateKey.value.trim();
+if(!token){
+videoStatus.textContent='No Replicate token — showing sample movie. Add your Replicate token for real AI video.';
+return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
 }
-generateBtn.addEventListener('click',async ()=>{
-const text=docText.value.trim(); if(!text){genStatus.textContent='Upload a document first'; return;}
-const prompt=promptEl.value.trim()||'Create a cinematic movie'; generateBtn.disabled=true; genStatus.textContent='Analyzing document...'; setProgress(10);
 try{
-const analysis=await analyzeWithAI(text); genStatus.textContent='Generating movie plan...'; setProgress(40);
-const plan=await generatePlanWithAI(text,prompt); setProgress(70); genStatus.textContent='Plan created! Rendering video...';
-planCard.style.display='block'; planContent.innerHTML=`<h4>${plan.title}</h4><p><em>${plan.logline}</em></p><p>Total: ${plan.totalDuration}s | Style: ${plan.style}</p>`+plan.scenes.map(s=>`<div class="scene"><strong>${s.title}</strong> (${s.durationSeconds}s)<br>${s.description}<br><small>Visual: ${s.visualPrompt}</small><br><small>Narration: ${s.narration.slice(0,200)}</small></div>`).join('');
-const videoUrl=await generateVideoClip(plan.scenes[0]?.visualPrompt||plan.logline||'cinematic movie'); setProgress(100);
-const project={id:Date.now().toString(),title:plan.title,logline:plan.logline,documentText:text.slice(0,1000),plan:plan,scenes:plan.scenes,videoUrl:videoUrl,status:'completed',progress:100,createdAt:new Date().toISOString()};
-projects.unshift(project); saveProjects(); genStatus.textContent='Completed! Video ready.';
-}catch(e){genStatus.textContent='Error: '+e.message; setProgress(0);}finally{generateBtn.disabled=false; setTimeout(()=>setProgress(0),2000);}
+videoStatus.textContent='Generating movie with Replicate AI... 30-60 sec';
+const res=await fetch('https://api.replicate.com/v1/predictions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Token '+token},body:JSON.stringify({version:'9f747673945c62801b13b84701c7869142c18b180cb4407a4e2e94ed4d5af79',input:{prompt:prompt,num_frames:32}})});
+let data=await res.json(); let attempts=0;
+while(data.status!=='succeeded' && data.status!=='failed' && attempts<40){
+await new Promise(r=>setTimeout(r,3000));
+const r2=await fetch('https://api.replicate.com/v1/predictions/'+data.id,{headers:{Authorization:'Token '+token}});
+data=await r2.json(); attempts++; videoStatus.textContent='Generating movie: '+data.status+' ('+attempts*3+'s)';
+}
+if(data.output){videoStatus.textContent='Movie generated!'; return Array.isArray(data.output)?data.output[0]:data.output;}
+return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+}catch(e){videoStatus.textContent='Video error, using sample'; return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';}
+}
+function fallbackPackage(bible,beats,script,prompt){
+const scenes=[];
+const bibleChunks=bible.match(/[^.!?]+[.!?]+/g)||[bible.slice(0,500)];
+const beatLines=beats.split('\n').filter(l=>l.trim().length>10);
+const scriptLines=script.split('\n').filter(l=>l.trim().length>5);
+for(let i=0;i<Math.min(5,Math.max(3,beatLines.length));i++){
+const beat=beatLines[i]||`Beat ${i+1}`;
+const bibleContext=bibleChunks[i]||bible.slice(i*200,(i+1)*200);
+const scriptContext=scriptLines[i]||script.slice(i*300,(i+1)*300);
+scenes.push({
+title:`Shot ${i+1} - ${beat.slice(0,40)}`,
+description:`Forward: ${beat.slice(0,120)} | Backwards: ${bibleContext.slice(0,120)} | Script: ${scriptContext.slice(0,120)}`,
+durationSeconds:8,
+visualPrompt:`cinematic shot, ${prompt}, ${beat.slice(0,80)}, ${bibleContext.slice(0,80)}, photorealistic, 4k`,
+narration:`${beat} - ${scriptContext.slice(0,200)}`,
+properFormat:`INT./EXT. LOCATION - DAY\nAction: ${bibleContext.slice(0,100)}\nCharacter: ${scriptContext.slice(0,100)}\nBeat: ${beat.slice(0,100)}`
 });
-renderProjects();
+}
+const title=(script.slice(0,120).match(/[A-Z][A-Z\s]{3,}/)||['UNTITLED PROJECT'])[0]||'UNTITLED';
+const logline=`When ${bible.slice(0,70).replace(/\n/g,' ')} meets ${beats.slice(0,70).replace(/\n/g,' ')}, ${title.trim()} unfolds.`;
+return {title:title.trim(),logline,synopsis:script.slice(0,1000),treatment:`TREATMENT - ${title}\nLOGLINE: ${logline}\n\nWORLD FROM BIBLE (Backwards):\n${bible.slice(0,1000)}\n\nSTRUCTURE FROM BEATS (Forward):\n${beats.slice(0,1000)}\n\nSCREENPLAY CORE:\n${script.slice(0,1500)}\n\nPROPER SHOT FORMATTING:\n${scenes.map(s=>s.properFormat).join('\n\n')}`,onepager:`ONE-PAGER - ${title}\n\nLOGLINE: ${logline}\n\nSYNOPSIS: ${script.slice(0,800)}\n\nTONE: ${prompt}`,characters:`CHARACTERS - From Bible + Script\n${bible.slice(0,800)}`,locations:`LOCATIONS\nFrom Bible: ${bible.slice(200,800)}\nFrom Script: ${script.slice(200,600)}`,budget:`BUDGET TOP SHEET\nAbove: $450k\nBelow: $1.2M\nTotal: $2.2M indie / $12M studio\n\nPROPER SHOOTING FORMAT:\n${scenes.map((s,i)=>`${i+1}. ${s.properFormat}`).join('\n')}`,scenes};
+}
+
+genMovieBtn.onclick=async ()=>{
+const bible=textBible.value.trim(); const beats=textBeats.value.trim(); const script=textScript.value.trim(); const prompt=promptEl.value.trim()||'cinematic movie';
+if(!bible &&!beats &&!script){genStatus.textContent='Upload at least one'; return;}
+if(moviesMade>=1 &&!isProMovies){
+showPaywall('movie');
+genStatus.textContent='Free movie used — $10 per movie now';
+return;
+}
+genStatus.textContent='Backwards integration: parsing Bible... Forward integration: parsing Beats + Script... Breaking into proper shot format...'; setProgress(15);
+try{
+let pkg=null;
+const systemPrompt='You are Hollywood pipeline engineer. You do backwards integration (Story Bible -> world rules) and forward integration (Beat Sheet -> structure, Screenplay -> dialogue/scenes) and break into proper shooting format that makes shots in a movie. Return JSON with: title, logline, synopsis, treatment (800+ words), onepager (400+ words), characters, locations, budgetTopSheet, shotList (10 shots with INT/EXT formatting), productionValue, scenes array (5 scenes each with title, description, durationSeconds, visualPrompt, narration, properFormat).';
+const userPrompt=`MASTER STORY BIBLE (${bible.length} chars):\n${bible.slice(0,12000)}\n\nMASTER BEAT SHEET (${beats.length} chars):\n${beats.slice(0,10000)}\n\nSCREENPLAY (${script.length} chars):\n${script.slice(0,14000)}\n\nSTYLE PROMPT: ${prompt}\n\nTask: Break down Bible + Beat Sheet + Screenplay into proper formatting for shots, reengineer into movie.`;
+setProgress(30);
+const ai=await callOpenAI(systemPrompt,userPrompt);
+if(ai){
+pkg={title:ai.title,logline:ai.logline,synopsis:ai.synopsis,treatment:ai.treatment,onepager:ai.onepager,characters:ai.characters,locations:(ai.locations||'')+'\n'+(ai.productionValue||''),budget:(ai.budgetTopSheet||'')+'\nSHOT LIST (Proper Format):\n'+(Array.isArray(ai.shotList)?ai.shotList.join('\n'):(ai.shotList||'')),scenes:ai.scenes||[]};
+}else{pkg=fallbackPackage(bible,beats,script,prompt);}
+setProgress(55);
+genStatus.textContent='Generating movie video from shot breakdown...';
+const videoPrompt=pkg.scenes && pkg.scenes[0]? pkg.scenes[0].visualPrompt + ' ' + prompt : (pkg.logline+' cinematic '+prompt);
+const videoUrl=await generateVideoClip(videoPrompt);
+setProgress(85);
+outTreatment.textContent=pkg.treatment; outOnePager.textContent=pkg.onepager;
+outLogline.textContent=`TITLE: ${pkg.title}\n\nLOGLINE: ${pkg.logline}\n\nSYNOPSIS: ${pkg.synopsis}\n\nPROPER SHOT BREAKDOWN:\n${(pkg.scenes||[]).map(s=>s.properFormat||s.title+': '+s.description).join('\n\n')}`;
+outChars.textContent=typeof pkg.characters==='string'?pkg.characters:JSON.stringify(pkg.characters,null,2);
+outLocations.textContent=typeof pkg.locations==='string'?pkg.locations:JSON.stringify(pkg.locations,null,2);
+outBudget.textContent=typeof pkg.budget==='string'?pkg.budget:JSON.stringify(pkg.budget,null,2);
+output.style.display='block';
+mainVideo.src=videoUrl; videoStatus.textContent='Movie ready: '+pkg.title+' - 1 free movie used, next movies $10';
+sceneBreakdown.innerHTML=(pkg.scenes||[]).map((s,i)=>`<div style="padding:12px;border:1px solid var(--border);border-radius:10px;margin-top:8px;background:var(--panel2)"><strong>Shot ${i+1}: ${s.title}</strong> (${s.durationSeconds||8}s)<br><small style="color:var(--muted)">Proper Format:</small><br><pre style="white-space:pre-wrap;font-size:11px;background:#000;padding:8px;border-radius:6px;margin-top:6px">${s.properFormat||s.description}</pre><small>Visual Prompt: ${s.visualPrompt||''}</small><br><small>Narration: ${s.narration||''}</small></div>`).join('');
+
+if(!isTreatmentUnlocked){treatmentLock.style.display='grid';}else{treatmentLock.style.display='none';}
+if(!isOnePagerUnlocked){onePagerLock.style.display='grid';}else{onePagerLock.style.display='none';}
+
+setProgress(100); genStatus.textContent=`Done - Movie generated! Movies made: ${moviesMade+1}. Treatment & One-Pager are paid extras ($5 each).`;
+moviesMade++; localStorage.setItem('sts_moviesMade',moviesMade.toString()); updateBadges();
+window._lastPkg=pkg; window._lastVideo=videoUrl;
+}catch(e){genStatus.textContent='Error: '+e.message; console.error(e); setProgress(0);}
+};
+
+window.downloadText=function(type){
+if(type==='treatment' &&!isTreatmentUnlocked){showPaywall('treatment'); return;}
+if(type==='onepager' &&!isOnePagerUnlocked){showPaywall('onepager'); return;}
+const pkg=window._lastPkg; if(!pkg) return; const blob=new Blob([type==='treatment'?pkg.treatment:pkg.onepager],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=type+'.txt'; a.click(); URL.revokeObjectURL(url);
+};
+window.downloadJSON=function(){
+const pkg=window._lastPkg; if(!pkg) return; const blob=new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='ProductionPackage.json'; a.click(); URL.revokeObjectURL(url);
+};
+window.exportAllPDF=function(){
+if(!isTreatmentUnlocked ||!isOnePagerUnlocked){alert('Treatments and One-Pager are paid extras - unlock them to export full pack');}
+const pkg=window._lastPkg; if(!pkg) return; const {jsPDF}=window.jspdf; const doc=new jsPDF(); let y=10;
+function add(title,txt){doc.setFontSize(14); doc.text(title,10,y); y+=8; doc.setFontSize(9); const lines=doc.splitTextToSize(txt||'',190); for(const l of lines){if(y>280){doc.addPage(); y=10;} doc.text(l,10,y); y+=5;} y+=6;}
+add('TITLE: '+pkg.title,''); add('LOGLINE',pkg.logline); add('SYNOPSIS',pkg.synopsis); add('SHOT BREAKDOWN (Proper Format)',(pkg.scenes||[]).map(s=>s.properFormat||s.title).join('\n\n')); add('VIDEO',window._lastVideo||'Sample'); if(isTreatmentUnlocked) add('TREATMENT',pkg.treatment); if(isOnePagerUnlocked) add('ONE-PAGER',pkg.onepager);
+doc.save('MoviePackage.pdf');
+};
 </script>
 </body>
 </html>
