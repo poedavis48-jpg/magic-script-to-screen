@@ -1,113 +1,1838 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Magic Script to Movie</title>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<style>
-:root{--bg:#070a12;--panel:#121725;--panel2:#1a2035;--border:#232a44;--text:#e6e8f0;--muted:#8a90a8;--accent:#8b5cf6;--accent2:#ec4899}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
-.header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,10,18,.98);gap:10px}
-.logo{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));flex-shrink:0}
-.headerLeft{display:flex;gap:10px;align-items:center;min-width:0;flex:1}
-.headerTitle{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16px}
-.headerSub{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.headerRight{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.container{width:min(1400px,calc(100% - 20px));margin:0 auto;padding:16px 0 80px}
-.hero{padding:18px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,var(--panel),#0e1220)}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
-@media(max-width:980px){.grid3{grid-template-columns:1fr}.hideMobile{display:none!important}}
-.card{padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--panel);margin-top:14px}
-.drop{border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;background:var(--panel2);cursor:pointer}
-.drop.dragover{border-color:var(--accent);background:#1f2340}
-.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer;font-weight:700;font-size:13px}
-.btnPrimary{background:var(--accent);border-color:var(--accent);color:#fff}
-.input,.textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:13px}
-.badge{font-size:10px;padding:4px 8px;border-radius:20px;background:#1e233d;border:1px solid var(--border);color:var(--muted)}
-.progress{height:8px;background:var(--panel2);border-radius:20px;overflow:hidden}
-.progressBar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width.3s}
-.paywall{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);display:none;place-items:center;z-index:100;padding:20px}
-.paywallBox{width:min(560px,100%);background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:20px}
-.output{display:none}
-.docBlock{white-space:pre-wrap;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;line-height:1.5;max-height:380px;overflow:auto}
-.videoWrap{margin-top:10px;background:#000;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
-video{width:100%;display:block}
-.lockOverlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(7,10,18,.8);border-radius:10px}
-.settings{display:none;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screen Forge</title>
+
+  <style>
+    :root {
+      --bg: #0b0d11;
+      --panel: #13161d;
+      --panel-2: #191d26;
+      --panel-3: #202530;
+      --border: #2b313d;
+      --text: #f1f3f6;
+      --muted: #9aa3b2;
+      --accent: #d6a84f;
+      --accent-hover: #edc36b;
+      --danger: #d96868;
+      --success: #72c48b;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      background: #0f1116;
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 10px 28px;
+    }
+
+    .brand-mark {
+      width: 35px;
+      height: 35px;
+      border: 2px solid var(--accent);
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 17px;
+    }
+
+    .brand-name {
+      font-size: 19px;
+      font-weight: 750;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-name span {
+      color: var(--accent);
+    }
+
+    .nav-label {
+      color: #697283;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0 12px;
+      margin: 8px 0 10px;
+    }
+
+    .nav-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      border-radius: 9px;
+      padding: 11px 12px;
+      margin-bottom: 4px;
+      text-align: left;
+      transition: 0.2s;
+    }
+
+    .nav-button:hover {
+      background: var(--panel-2);
+      color: var(--text);
+    }
+
+    .nav-button.active {
+      background: #29251d;
+      border-color: #5c4927;
+      color: var(--accent-hover);
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 16px 10px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .save-status {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .save-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    /* MAIN */
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      min-height: 72px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 30px;
+      background: rgba(11, 13, 17, 0.96);
+    }
+
+    .topbar-left {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .page-title {
+      font-size: 21px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--panel-3);
+      border-color: #46505f;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #16120b;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-danger {
+      color: #f09b9b;
+    }
+
+    .content {
+      padding: 30px;
+      max-width: 1450px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* DASHBOARD */
+
+    .welcome {
+      margin-bottom: 28px;
+    }
+
+    .welcome h1 {
+      font-size: clamp(27px, 4vw, 40px);
+      line-height: 1.1;
+      margin: 0 0 10px;
+      letter-spacing: -1.5px;
+    }
+
+    .welcome p {
+      color: var(--muted);
+      margin: 0;
+      max-width: 650px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .stat-card {
+      padding: 20px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    .stat-value {
+      font-size: 27px;
+      font-weight: 750;
+    }
+
+    .stat-sub {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 7px;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-heading h2 {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .section-heading span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .project-card {
+      padding: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .project-card h3 {
+      margin: 0 0 7px;
+      font-size: 18px;
+    }
+
+    .project-card p {
+      color: var(--muted);
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .project-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 13px;
+    }
+
+    .tag {
+      color: #c5ccd7;
+      background: var(--panel-3);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 4px 8px;
+      font-size: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 42px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+
+    /* FORMS */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      color: #c7ced9;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .form-help {
+      color: #737d8d;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      color: var(--text);
+      background: #0e1015;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 12px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(214, 168, 79, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 130px;
+      line-height: 1.55;
+    }
+
+    .large-textarea {
+      min-height: 300px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-header h2 {
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    /* STORY BIBLE */
+
+    .bible-layout {
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .subnav {
+      height: fit-content;
+      padding: 10px;
+    }
+
+    .subnav button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 7px;
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
+    .subnav button:hover,
+    .subnav button.active {
+      background: var(--panel-3);
+      color: var(--text);
+    }
+
+    .bible-section {
+      display: none;
+    }
+
+    .bible-section.active {
+      display: block;
+    }
+
+    /* BEATS */
+
+    .beat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .beat-item {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 13px;
+      padding: 15px;
+      background: #101319;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+    }
+
+    .beat-number {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #2a2419;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .beat-item input {
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+      padding: 4px 0 8px;
+      font-weight: 650;
+    }
+
+    .beat-item textarea {
+      margin-top: 8px;
+      min-height: 62px;
+      background: transparent;
+      border: 0;
+      padding: 3px 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--muted);
+    }
+
+    .icon-btn:hover {
+      color: #ef9a9a;
+      border-color: #713f3f;
+    }
+
+    /* CHARACTERS */
+
+    .character-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .character-card {
+      padding: 18px;
+      border: 1px solid var(--border);
+      background: #101319;
+      border-radius: 10px;
+    }
+
+    .character-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .character-top input {
+      font-size: 16px;
+      font-weight: 700;
+      background: transparent;
+      border: 0;
+      padding: 4px 0;
+    }
+
+    .character-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .character-fields textarea {
+      min-height: 90px;
+      font-size: 12px;
+    }
+
+    /* SCREENPLAY EDITOR */
+
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel-2);
+    }
+
+    .toolbar-label {
+      color: var(--muted);
+      font-size: 11px;
+      margin-right: 4px;
+    }
+
+    .format-btn {
+      padding: 7px 10px;
+      background: #252b35;
+      border: 1px solid #353d4a;
+      border-radius: 6px;
+      color: #d5dae2;
+      font-size: 11px;
+    }
+
+    .format-btn:hover {
+      background: #333b49;
+    }
+
+    .editor-info {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .screenplay-editor {
+      min-height: 650px;
+      padding: 40px clamp(20px, 7vw, 100px);
+      background: #e8e5dd;
+      color: #111;
+      border: 0;
+      border-radius: 0 0 var(--radius) var(--radius);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      resize: vertical;
+      white-space: pre-wrap;
+    }
+
+    .screenplay-editor:focus {
+      box-shadow: none;
+      border: 0;
+    }
+
+    .editor-footer {
+      padding: 10px 15px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* MOBILE */
+
+    .mobile-nav {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 210px;
+      }
+
+      .content {
+        padding: 22px;
+      }
+
+      .bible-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .subnav {
+        display: flex;
+        overflow-x: auto;
+        gap: 4px;
+      }
+
+      .subnav button {
+        white-space: nowrap;
+        width: auto;
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .app {
+        display: block;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-nav {
+        display: flex;
+        overflow-x: auto;
+        border-bottom: 1px solid var(--border);
+        background: #0f1116;
+        padding: 8px;
+        gap: 5px;
+      }
+
+      .mobile-nav .nav-button {
+        white-space: nowrap;
+        width: auto;
+        margin: 0;
+        padding: 9px 12px;
+      }
+
+      .topbar {
+        padding: 14px 18px;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .topbar-actions {
+        width: 100%;
+      }
+
+      .topbar-actions .btn {
+        flex: 1;
+      }
+
+      .content {
+        padding: 18px;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: auto;
+      }
+
+      .project-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .project-card .btn {
+        width: 100%;
+      }
+
+      .character-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .beat-item {
+        grid-template-columns: 32px minmax(0, 1fr) auto;
+        gap: 8px;
+      }
+
+      .screenplay-editor {
+        padding: 25px 15px;
+        font-size: 12px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="header">
-<div class="headerLeft"><div class="logo">STS</div><div style="min-width:0"><div class="headerTitle">Magic Script to Movie</div><div class="headerSub hideMobile">1 FREE • $10/movie • Treatments extra</div></div></div>
-<div class="headerRight"><span class="badge" id="moviesLeftBadge">1 FREE LEFT</span><span class="badge" id="payStatus">FREE</span><button class="btn" style="padding:6px 8px" id="settingsBtn">⚙️</button></div>
-</div>
-<div class="container">
-<div class="hero">
-<h2 style="margin:0 0 6px;font-size:18px">Fully Working — Backwards + Forward Integration</h2>
-<p style="margin:0;color:var(--muted);font-size:12px">Upload your Master Story Bible, Beat Sheet, and Screenplay. App reverse engineers into proper shooting format and generates movie. Treatments are paid extras.</p>
-<div id="settingsPanel" class="settings">
-<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Advanced — Stripe is hardcoded, you don't need to show it to customers</div>
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<input id="openaiKey" class="input" style="max-width:220px" type="password" placeholder="OpenAI Key (optional)">
-<input id="replicateKey" class="input" style="max-width:220px" type="password" placeholder="Replicate Token (optional)">
-</div>
-<div style="font-size:10px;color:var(--muted);margin-top:8px">Stripe Checkout: https://buy.stripe.com/eVqbJ19Z1d3ldSgcqk3Nm01 — hardcoded, paywall uses this automatically</div>
-</div>
-<input id="stripeLink" type="hidden" value="https://buy.stripe.com/eVqbJ19Z1d3ldSgcqk3Nm01">
-</div>
-<div class="grid3">
-<div class="card"><h3 style="margin:0 0 6px">1. Master Story Bible</h3><div class="badge">World • Lore • Backwards</div><div id="dropBible" class="drop" style="margin-top:8px"><strong>Drop Story Bible</strong><br><small>All formats</small><input type="file" id="fileBible" hidden accept=".pdf,.docx,.doc,.txt,.md,.fountain,.rtf,.html,.fdx"></div><p id="statusBible" style="color:var(--muted);font-size:11px">No file</p><textarea id="textBible" class="textarea" rows="6" placeholder="Paste Story Bible here..."></textarea></div>
-<div class="card"><h3 style="margin:0 0 6px">2. Master Beat Sheet</h3><div class="badge">Beats • Forward</div><div id="dropBeats" class="drop" style="margin-top:8px"><strong>Drop Beat Sheet</strong><br><small>All formats</small><input type="file" id="fileBeats" hidden accept=".pdf,.docx,.doc,.txt,.csv,.md,.rtf,.html,.fdx"></div><p id="statusBeats" style="color:var(--muted);font-size:11px">No file</p><textarea id="textBeats" class="textarea" rows="6" placeholder="Paste Beat Sheet here..."></textarea></div>
-<div class="card"><h3 style="margin:0 0 6px">3. Screenplay</h3><div class="badge">Script • Proper Format</div><div id="dropScript" class="drop" style="margin-top:8px"><strong>Drop Screenplay</strong><br><small>All formats</small><input type="file" id="fileScript" hidden accept=".pdf,.docx,.doc,.txt,.fountain,.fdx,.md,.rtf,.html"></div><p id="statusScript" style="color:var(--muted);font-size:11px">No file</p><textarea id="textScript" class="textarea" rows="6" placeholder="Paste Screenplay here..."></textarea></div>
-</div>
-<div class="card">
-<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
-<div><h3 style="margin:0">Generate Movie</h3><small style="color:var(--muted)">Breaks down files into shooting format, reengineers into movie</small></div>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="prompt" class="input" style="width:220px" placeholder="Style e.g. thriller"><button id="genMovieBtn" class="btn btnPrimary">Generate Movie (1 FREE left)</button><button id="clearBtn" class="btn">Clear</button></div>
-</div>
-<div class="progress" style="margin-top:10px"><div id="progressBar" class="progressBar"></div></div>
-<p id="genStatus" style="color:var(--muted);font-size:11px;margin-top:6px">Ready - 1 free movie included - buttons fixed</p>
-</div>
-<div id="output" class="output">
-<div class="card" style="border-color:var(--accent)"><h3>🎬 Generated Movie</h3><div id="videoContainer" class="videoWrap"><video id="mainVideo" controls playsinline></video></div><p id="videoStatus" style="color:var(--muted);font-size:11px;margin-top:6px">No video yet</p><div id="sceneBreakdown" style="margin-top:10px"></div></div>
-</div>
-</div>
-<div id="paywall" class="paywall"><div class="paywallBox"><h2 style="margin-top:0">Unlock Movie — $10</h2><p style="color:var(--muted);font-size:12px">You used your free movie. Each movie is $10. Stripe checkout below.</p><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button id="payNowBtn" class="btn btnPrimary">Pay $10 with Stripe — https://buy.stripe.com/eVqbJ19Z1d3ldSgcqk3Nm01</button><button id="payDemoBtn" class="btn">Demo Unlock (free test)</button><button id="payCloseBtn" class="btn">Close</button></div></div></div>
-<div id="extrasPaywall" class="paywall"><div class="paywallBox"><h2 id="extrasTitle">Unlock Extra</h2><p id="extrasText" style="color:var(--muted);font-size:12px">Paid extra</p><div style="display:flex;gap:8px;margin-top:12px"><button id="extrasPayBtn" class="btn btnPrimary">Pay with Stripe</button><button id="extrasDemoBtn" class="btn">Demo Unlock</button><button id="extrasCloseBtn" class="btn">Close</button></div></div></div>
-<script>
-const HARDCODED_STRIPE_LINK="https://buy.stripe.com/eVqbJ19Z1d3ldSgcqk3Nm01";
-const $=id=>document.getElementById(id);
-const dropBible=$('dropBible'), fileBible=$('fileBible'), statusBible=$('statusBible'), textBible=$('textBible');
-const dropBeats=$('dropBeats'), fileBeats=$('fileBeats'), statusBeats=$('statusBeats'), textBeats=$('textBeats');
-const dropScript=$('dropScript'), fileScript=$('fileScript'), statusScript=$('statusScript'), textScript=$('textScript');
-const genMovieBtn=$('genMovieBtn'), clearBtn=$('clearBtn'), progressBar=$('progressBar'), genStatus=$('genStatus'), promptEl=$('prompt');
-const output=$('output'), paywall=$('paywall'), payStatus=$('payStatus'), moviesLeftBadge=$('moviesLeftBadge'), openaiKey=$('openaiKey'), replicateKey=$('replicateKey'), stripeLink=$('stripeLink');
-const payNowBtn=$('payNowBtn'), payDemoBtn=$('payDemoBtn'), payCloseBtn=$('payCloseBtn');
-const extrasPaywall=$('extrasPaywall'), extrasTitle=$('extrasTitle'), extrasText=$('extrasText'), extrasPayBtn=$('extrasPayBtn'), extrasDemoBtn=$('extrasDemoBtn'), extrasCloseBtn=$('extrasCloseBtn');
-const mainVideo=$('mainVideo'), videoStatus=$('videoStatus'), sceneBreakdown=$('sceneBreakdown');
-const settingsPanel=$('settingsPanel'), settingsBtn=$('settingsBtn');
-stripeLink.value=HARDCODED_STRIPE_LINK;
-settingsBtn.onclick=()=>{settingsPanel.style.display=settingsPanel.style.display==='none'?'block':'none';};
-let moviesMade=parseInt(localStorage.getItem('sts_moviesMade')||'0');
-let isProMovies=localStorage.getItem('sts_proMovies')==='1';
-function updateBadges(){const freeLeft=Math.max(0,1-moviesMade); moviesLeftBadge.textContent=freeLeft>0?`${freeLeft} FREE LEFT`:`${moviesMade} made`; payStatus.textContent=isProMovies?'PRO':'FREE'; genMovieBtn.textContent=freeLeft>0?`Generate Movie (${freeLeft} FREE left)`:`Generate Movie ($10)`;}
-updateBadges();
-function setProgress(p){progressBar.style.width=p+'%';}
-function showPaywall(type){if(type==='movie'){paywall.style.display='grid';}else if(type==='treatment'){extrasTitle.textContent='Unlock Treatment - $5'; extrasPaywall.style.display='grid'; window._extrasType='treatment';}else if(type==='onepager'){extrasTitle.textContent='Unlock One-Pager - $5'; extrasPaywall.style.display='grid'; window._extrasType='onepager';}}
-function hidePaywalls(){paywall.style.display='none'; extrasPaywall.style.display='none';}
-payCloseBtn.onclick=hidePaywalls; extrasCloseBtn.onclick=hidePaywalls;
-payDemoBtn.onclick=()=>{isProMovies=true; localStorage.setItem('sts_proMovies','1'); hidePaywalls(); genStatus.textContent='Movies unlocked (demo)'; updateBadges();};
-payNowBtn.onclick=()=>{window.open(HARDCODED_STRIPE_LINK,'_blank'); isProMovies=true; localStorage.setItem('sts_proMovies','1'); hidePaywalls(); updateBadges();};
-function setupDrop(dropEl,fileEl,statusEl,textEl){dropEl.addEventListener('click',()=>fileEl.click()); dropEl.addEventListener('dragover',e=>{e.preventDefault(); dropEl.classList.add('dragover');}); dropEl.addEventListener('dragleave',()=>dropEl.classList.remove('dragover')); dropEl.addEventListener('drop',async e=>{e.preventDefault(); dropEl.classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f) await handleFile(f,statusEl,textEl);}); fileEl.addEventListener('change',async e=>{const f=e.target.files[0]; if(f) await handleFile(f,statusEl,textEl);});}
-async function handleFile(file,statusEl,textEl){statusEl.textContent='Extracting '+file.name+'...'; setProgress(10); try{let text=''; if(file.name.toLowerCase().endsWith('.pdf')||file.type.includes('pdf')){const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise; for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i); const c=await page.getTextContent(); text+=c.items.map(it=>it.str).join(' ')+'\n';}}else if(file.name.toLowerCase().endsWith('.docx')){const buf=await file.arrayBuffer(); const res=await mammoth.extractRawText({arrayBuffer:buf}); text=res.value;}else{text=await file.text();} textEl.value=text.slice(0,150000); statusEl.textContent=`Loaded ${file.name} — ${text.length} chars`; setProgress(100); setTimeout(()=>setProgress(0),800);}catch(err){statusEl.textContent='Error: '+err.message; setProgress(0);}}
-setupDrop(dropBible,fileBible,statusBible,textBible); setupDrop(dropBeats,fileBeats,statusBeats,textBeats); setupDrop(dropScript,fileScript,statusScript,textScript);
-clearBtn.onclick=()=>{textBible.value=''; textBeats.value=''; textScript.value=''; statusBible.textContent='No file'; statusBeats.textContent='No file'; statusScript.textContent='No file'; output.style.display='none'; genStatus.textContent='Cleared'; setProgress(0);};
-async function generateVideoClip(prompt){const token=replicateKey.value.trim(); if(!token){videoStatus.textContent='No Replicate token — using sample movie'; return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';} try{videoStatus.textContent='Generating movie...'; const res=await fetch('https://api.replicate.com/v1/predictions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Token '+token},body:JSON.stringify({version:'9f747673945c62801b13b84701c7869142c18b180cb4407a4e2e94ed4d5af79',input:{prompt:prompt,num_frames:32}})}); let data=await res.json(); let attempts=0; while(data.status!=='succeeded' && data.status!=='failed' && attempts<40){await new Promise(r=>setTimeout(r,3000)); const r2=await fetch('https://api.replicate.com/v1/predictions/'+data.id,{headers:{Authorization:'Token '+token}}); data=await r2.json(); attempts++;} if(data.output){return Array.isArray(data.output)?data.output[0]:data.output;} return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';}catch(e){return 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';}}
-function fallbackPackage(bible,beats,script,prompt){const scenes=[]; const bibleChunks=bible.match(/[^.!?]+[.!?]+/g)||[bible.slice(0,500)]; const beatLines=beats.split('\n').filter(l=>l.trim().length>5); const scriptLines=script.split('\n').filter(l=>l.trim().length>3); for(let i=0;i<5;i++){const beat=beatLines[i]||`Beat ${i+1}`; const bibleContext=bibleChunks[i]||bible.slice(i*200,(i+1)*200); const scriptContext=scriptLines[i]||script.slice(i*200,(i+1)*200); scenes.push({title:`Shot ${i+1} - ${beat.slice(0,30)}`,description:`${beat.slice(0,100)} | ${bibleContext.slice(0,100)}`,durationSeconds:8,visualPrompt:`cinematic ${prompt}, ${beat.slice(0,60)}`,narration:scriptContext.slice(0,200),properFormat:`INT./EXT. LOCATION ${i+1} - DAY\nAction: ${bibleContext.slice(0,80)}\nBeat: ${beat.slice(0,80)}\nDialogue: ${scriptContext.slice(0,80)}`});} const title=(script.slice(0,100).match(/[A-Z][A-Z\s]{3,}/)||['UNTITLED'])[0]||'UNTITLED'; const logline=`When ${bible.slice(0,60)} meets ${beats.slice(0,60)}, ${title} unfolds.`; return {title:title.trim(),logline,synopsis:script.slice(0,800),treatment:`TREATMENT - ${title}\n${logline}\n\nBIBLE:\n${bible.slice(0,1000)}\n\nBEATS:\n${beats.slice(0,1000)}\n\nSCRIPT:\n${script.slice(0,1000)}`,onepager:`ONE-PAGER - ${title}\n${logline}\n${script.slice(0,600)}`,characters:bible.slice(0,600),locations:bible.slice(200,600),budget:`BUDGET\nAbove: $450k\nBelow: $1.2M\nTotal: $2.2M / $12M\n\nSHOTS:\n${scenes.map(s=>s.properFormat).join('\n\n')}`,scenes};}
-genMovieBtn.onclick=async ()=>{const bible=textBible.value.trim(); const beats=textBeats.value.trim(); const script=textScript.value.trim(); const prompt=promptEl.value.trim()||'cinematic movie'; if(!bible &&!beats &&!script){genStatus.textContent='Upload at least one file'; return;} if(moviesMade>=1 &&!isProMovies){showPaywall('movie'); genStatus.textContent='Free movie used - $10 per movie'; return;} genStatus.textContent='Parsing Bible + Beats + Script... breaking into shots...'; setProgress(15); try{let pkg=fallbackPackage(bible,beats,script,prompt); setProgress(55); genStatus.textContent='Generating video...'; const videoPrompt=pkg.scenes && pkg.scenes[0]? pkg.scenes[0].visualPrompt+' '+prompt : (pkg.logline+' '+prompt); const videoUrl=await generateVideoClip(videoPrompt); setProgress(85); output.style.display='block'; mainVideo.src=videoUrl; videoStatus.textContent='Movie ready: '+pkg.title; sceneBreakdown.innerHTML=(pkg.scenes||[]).map((s,i)=>`<div style="padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:6px;background:var(--panel2)"><strong>Shot ${i+1}: ${s.title}</strong><br><pre style="white-space:pre-wrap;font-size:10px;background:#000;padding:6px;border-radius:4px">${s.properFormat||s.description}</pre></div>`).join(''); setProgress(100); genStatus.textContent=`Done! Movies made: ${moviesMade+1}`; moviesMade++; localStorage.setItem('sts_moviesMade',moviesMade.toString()); updateBadges(); window._lastPkg=pkg; window._lastVideo=videoUrl;}catch(e){genStatus.textContent='Error: '+e.message; console.error(e); setProgress(0);}};
-</script>
+  <div class="app">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div class="brand-name">Screen <span>Forge</span></div>
+      </div>
+
+      <div class="nav-label">Workspace</div>
+
+      <button class="nav-button active" data-view="dashboard">
+        <span class="nav-icon">⌂</span>
+        Dashboard
+      </button>
+
+      <button class="nav-button" data-view="project">
+        <span class="nav-icon">▣</span>
+        Project
+      </button>
+
+      <button class="nav-button" data-view="bible">
+        <span class="nav-icon">▤</span>
+        Story Bible
+      </button>
+
+      <button class="nav-button" data-view="beats">
+        <span class="nav-icon">◈</span>
+        Beat Sheet
+      </button>
+
+      <button class="nav-button" data-view="characters">
+        <span class="nav-icon">♙</span>
+        Characters
+      </button>
+
+      <button class="nav-button" data-view="screenplay">
+        <span class="nav-icon">▥</span>
+        Screenplay
+      </button>
+
+      <div class="sidebar-bottom">
+        <div class="save-status">
+          <span class="save-dot"></span>
+          <span id="saveStatus">Autosave ready</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav">
+      <button class="nav-button active" data-view="dashboard">⌂ Home</button>
+      <button class="nav-button" data-view="project">▣ Project</button>
+      <button class="nav-button" data-view="bible">▤ Bible</button>
+      <button class="nav-button" data-view="beats">◈ Beats</button>
+      <button class="nav-button" data-view="characters">♙ Cast</button>
+      <button class="nav-button" data-view="screenplay">▥ Script</button>
+    </nav>
+
+    <main class="main">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="eyebrow">Screenplay Development Studio</div>
+          <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn" id="exportBtn">Export Project</button>
+          <button class="btn btn-primary" id="saveBtn">Save Project</button>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- DASHBOARD VIEW -->
+        <section class="view active" id="dashboard">
+
+          <div class="welcome">
+            <h1>Build the story.<br />Forge the screenplay.</h1>
+            <p>
+              A focused workspace for developing a film from its first idea
+              through story architecture, beats, characters, and screenplay.
+            </p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="stat-card">
+              <div class="stat-label">Project</div>
+              <div class="stat-value" id="dashProjectTitle">Untitled</div>
+              <div class="stat-sub">Current screenplay</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Beat Sheet</div>
+              <div class="stat-value" id="dashBeatCount">0</div>
+              <div class="stat-sub">Story beats created</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Screenplay</div>
+              <div class="stat-value" id="dashWordCount">0</div>
+              <div class="stat-sub">Words in current draft</div>
+            </div>
+          </div>
+
+          <div class="section-heading">
+            <h2>Current Project</h2>
+            <span>Workspace overview</span>
+          </div>
+
+          <div class="panel project-card">
+            <div>
+              <h3 id="projectCardTitle">Untitled Screenplay</h3>
+              <p id="projectCardLogline">
+                Your next story begins here.
+              </p>
+              <div class="project-meta">
+                <span class="tag" id="projectCardGenre">Genre not set</span>
+                <span class="tag" id="projectCardStatus">In Development</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" data-view="project">
+              Open Project
+            </button>
+          </div>
+
+        </section>
+
+        <!-- PROJECT VIEW -->
+        <section class="view" id="project">
+
+          <div class="section-heading">
+            <div>
+              <h2>Project Information</h2>
+              <span>Define the foundation of the screenplay.</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Project Identity</h2>
+            </div>
+
+            <div class="panel-body">
+              <div class="form-grid">
+
+                <div class="form-group">
+                  <label class="form-label" for="projectTitle">Project Title</label>
+                  <input
+                    id="projectTitle"
+                    type="text"
+                    placeholder="Enter screenplay title..."
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="projectGenre">Genre</label>
+                  <input
+                    id="projectGenre"
+                    type="text"
+                    placeholder="Drama, thriller, comedy..."
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="projectFormat">Format</label>
+                  <select id="projectFormat">
+                    <option>Feature Screenplay</option>
+                    <option>Short Screenplay</option>
+                    <option>Television Pilot</option>
+                    <option>Stage Play</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="projectStatus">Status</label>
+                  <select id="projectStatus">
+                    <option>In Development</option>
+                    <option>Outlining</option>
+                    <option>First Draft</option>
+                    <option>Revision</option>
+                    <option>Completed</option>
+                  </select>
+                </div>
+
+                <div class="form-group full">
+                  <label class="form-label" for="projectLogline">Logline</label>
+                  <textarea
+                    id="projectLogline"
+                    placeholder="A compelling one- or two-sentence description of the story..."
+                  ></textarea>
+                </div>
+
+                <div class="form-group full">
+                  <label class="form-label" for="projectNotes">Project Notes</label>
+                  <textarea
+                    id="projectNotes"
+                    class="large-textarea"
+                    placeholder="Themes, intentions, historical anchors, creative rules, research notes..."
+                  ></textarea>
+                </div>
+
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" id="saveProjectBtn">
+                  Save Project Details
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- STORY BIBLE VIEW -->
+        <section class="view" id="bible">
+
+          <div class="section-heading">
+            <div>
+              <h2>Story Bible</h2>
+              <span>Build the story architecture before drafting.</span>
+            </div>
+          </div>
+
+          <div class="bible-layout">
+
+            <div class="panel subnav">
+              <button class="bible-tab active" data-section="premise">
+                Premise & Theme
+              </button>
+              <button class="bible-tab" data-section="world">
+                World & Setting
+              </button>
+              <button class="bible-tab" data-section="conflict">
+                Conflict & Stakes
+              </button>
+              <button class="bible-tab" data-section="structure">
+                Structure Notes
+              </button>
+            </div>
+
+            <div class="panel panel-body">
+
+              <div class="bible-section active" id="premise">
+                <div class="form-group">
+                  <label class="form-label">Core Premise</label>
+                  <textarea
+                    id="biblePremise"
+                    class="large-textarea"
+                    placeholder="What is the essential story?"
+                  ></textarea>
+                </div>
+                <br />
+                <div class="form-group">
+                  <label class="form-label">Themes</label>
+                  <textarea
+                    id="bibleThemes"
+                    placeholder="What is the film really about beneath the plot?"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="bible-section" id="world">
+                <div class="form-group">
+                  <label class="form-label">World & Setting</label>
+                  <textarea
+                    id="bibleWorld"
+                    class="large-textarea"
+                    placeholder="Time period, locations, social environment, rules of the world..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="bible-section" id="conflict">
+                <div class="form-group">
+                  <label class="form-label">Central Conflict</label>
+                  <textarea
+                    id="bibleConflict"
+                    placeholder="Who or what opposes the protagonist?"
+                  ></textarea>
+                </div>
+                <br />
+                <div class="form-group">
+                  <label class="form-label">Stakes</label>
+                  <textarea
+                    id="bibleStakes"
+                    placeholder="What happens if the protagonist fails?"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="bible-section" id="structure">
+                <div class="form-group">
+                  <label class="form-label">Structure Notes</label>
+                  <textarea
+                    id="bibleStructure"
+                    class="large-textarea"
+                    placeholder="Act structure, chronology, turning points, ending, and structural decisions..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" id="saveBibleBtn">
+                  Save Story Bible
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+        <!-- BEAT SHEET VIEW -->
+        <section class="view" id="beats">
+
+          <div class="section-heading">
+            <div>
+              <h2>Beat Sheet</h2>
+              <span>Organize the dramatic movement of the story.</span>
+            </div>
+
+            <button class="btn btn-primary" id="addBeatBtn">
+              + Add Beat
+            </button>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Story Beats</h2>
+              <span id="beatCounter">0 beats</span>
+            </div>
+
+            <div class="panel-body">
+              <div class="beat-list" id="beatList"></div>
+
+              <div class="empty-state" id="beatEmpty">
+                <strong>No beats yet.</strong>
+                Add your first story beat to begin shaping the narrative.
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- CHARACTERS VIEW -->
+        <section class="view" id="characters">
+
+          <div class="section-heading">
+            <div>
+              <h2>Character Architecture</h2>
+              <span>Develop the people who carry the story.</span>
+            </div>
+
+            <button class="btn btn-primary" id="addCharacterBtn">
+              + Add Character
+            </button>
+          </div>
+
+          <div class="character-list" id="characterList"></div>
+
+          <div class="empty-state panel" id="characterEmpty">
+            <strong>No characters yet.</strong>
+            Add a character to begin building the cast.
+          </div>
+
+        </section>
+
+        <!-- SCREENPLAY VIEW -->
+        <section class="view" id="screenplay">
+
+          <div class="section-heading">
+            <div>
+              <h2>Screenplay Editor</h2>
+              <span>Draft the story in a focused writing environment.</span>
+            </div>
+          </div>
+
+          <div class="panel">
+
+            <div class="editor-toolbar">
+              <span class="toolbar-label">Insert:</span>
+
+              <button class="format-btn" data-insert="INT. LOCATION - DAY">
+                Scene Heading
+              </button>
+
+              <button class="format-btn" data-insert="CHARACTER NAME">
+                Character
+              </button>
+
+              <button class="format-btn" data-insert="(parenthetical)">
+                Parenthetical
+              </button>
+
+              <button class="format-btn" data-insert="Action description.">
+                Action
+              </button>
+
+              <button class="format-btn" data-insert="Dialogue goes here.">
+                Dialogue
+              </button>
+
+              <span class="editor-info">
+                Plain-text screenplay workspace
+              </span>
+            </div>
+
+            <textarea
+              id="screenplayEditor"
+              class="screenplay-editor"
+              spellcheck="false"
+              placeholder="FADE IN:
+
+INT. LOCATION - DAY
+
+Begin your screenplay here..."
+            ></textarea>
+
+            <div class="editor-footer">
+              <span id="scriptStats">0 words · 0 characters</span>
+              <span>Autosaved locally</span>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    /* =========================================================
+       SCREEN FORGE
+       Local-first screenplay development workspace
+       ========================================================= */
+
+    const STORAGE_KEY = "screenForgeProject";
+
+    const defaultProject = {
+      title: "",
+      genre: "",
+      format: "Feature Screenplay",
+      status: "In Development",
+      logline: "",
+      notes: "",
+
+      bible: {
+        premise: "",
+        themes: "",
+        world: "",
+        conflict: "",
+        stakes: "",
+        structure: ""
+      },
+
+      beats: [],
+
+      characters: [],
+
+      screenplay: ""
+    };
+
+    let project = loadProject();
+
+    function loadProject() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+
+        if (!saved) {
+          return structuredClone(defaultProject);
+        }
+
+        return mergeProject(
+          structuredClone(defaultProject),
+          JSON.parse(saved)
+        );
+      } catch (error) {
+        console.error("Could not load project:", error);
+        return structuredClone(defaultProject);
+      }
+    }
+
+    function mergeProject(base, saved) {
+      return {
+        ...base,
+        ...saved,
+        bible: {
+          ...base.bible,
+          ...(saved.bible || {})
+        },
+        beats: Array.isArray(saved.beats) ? saved.beats : [],
+        characters: Array.isArray(saved.characters)
+          ? saved.characters
+          : []
+      };
+    }
+
+    function saveProject() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+
+      const status = document.getElementById("saveStatus");
+      status.textContent = "Saved just now";
+
+      setTimeout(() => {
+        status.textContent = "Autosave ready";
+      }, 2000);
+
+      updateDashboard();
+    }
+
+    function autoSave() {
+      saveProject();
+    }
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    /* =========================================================
+       NAVIGATION
+       ========================================================= */
+
+    const viewTitles = {
+      dashboard: "Dashboard",
+      project: "Project Information",
+      bible: "Story Bible",
+      beats: "Beat Sheet",
+      characters: "Character Architecture",
+      screenplay: "Screenplay Editor"
+    };
+
+    function openView(viewId) {
+      document.querySelectorAll(".view").forEach(view => {
+        view.classList.toggle("active", view.id === viewId);
+      });
+
+      document.querySelectorAll(".nav-button").forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.view === viewId
+        );
+      });
+
+      $("pageTitle").textContent = viewTitles[viewId] || "Screen Forge";
+    }
+
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => {
+        openView(button.dataset.view);
+      });
+    });
+
+    /* =========================================================
+       PROJECT FORM
+       ========================================================= */
+
+    function populateProjectForm() {
+      $("projectTitle").value = project.title;
+      $("projectGenre").value = project.genre;
+      $("projectFormat").value = project.format;
+      $("projectStatus").value = project.status;
+      $("projectLogline").value = project.logline;
+      $("projectNotes").value = project.notes;
+    }
+
+    function readProjectForm() {
+      project.title = $("projectTitle").value.trim();
+      project.genre = $("projectGenre").value.trim();
+      project.format = $("projectFormat").value;
+      project.status = $("projectStatus").value;
+      project.logline = $("projectLogline").value.trim();
+      project.notes = $("projectNotes").value.trim();
+    }
+
+    $("saveProjectBtn").addEventListener("click", () => {
+      readProjectForm();
+      autoSave();
+      alert("Project details saved.");
+    });
+
+    /* =========================================================
+       STORY BIBLE
+       ========================================================= */
+
+    function populateBibleForm() {
+      $("biblePremise").value = project.bible.premise;
+      $("bibleThemes").value = project.bible.themes;
+      $("bibleWorld").value = project.bible.world;
+      $("bibleConflict").value = project.bible.conflict;
+      $("bibleStakes").value = project.bible.stakes;
+      $("bibleStructure").value = project.bible.structure;
+    }
+
+    function readBibleForm() {
+      project.bible.premise = $("biblePremise").value;
+      project.bible.themes = $("bibleThemes").value;
+      project.bible.world = $("bibleWorld").value;
+      project.bible.conflict = $("bibleConflict").value;
+      project.bible.stakes = $("bibleStakes").value;
+      project.bible.structure = $("bibleStructure").value;
+    }
+
+    document.querySelectorAll(".bible-tab").forEach(button => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.section;
+
+        document.querySelectorAll(".bible-tab").forEach(tab => {
+          tab.classList.toggle("active", tab === button);
+        });
+
+        document.querySelectorAll(".bible-section").forEach(section => {
+          section.classList.toggle("active", section.id === target);
+        });
+      });
+    });
+
+    $("saveBibleBtn").addEventListener("click", () => {
+      readBibleForm();
+      autoSave();
+      alert("Story Bible saved.");
+    });
+
+    /* =========================================================
+       BEAT SHEET
+       ========================================================= */
+
+    function renderBeats() {
+      const list = $("beatList");
+      const empty = $("beatEmpty");
+
+      list.innerHTML = "";
+
+      empty.style.display = project.beats.length ? "none" : "block";
+
+      $("beatCounter").textContent =
+        `${project.beats.length} beat${project.beats.length === 1 ? "" : "s"}`;
+
+      project.beats.forEach((beat, index) => {
+        const item = document.createElement("div");
+        item.className = "beat-item";
+
+        item.innerHTML = `
+          <div class="beat-number">${index + 1}</div>
+
+          <div>
+            <input
+              type="text"
+              class="beat-title"
+              value="${escapeAttribute(beat.title)}"
+              placeholder="Beat title..."
+            />
+
+            <textarea
+              class="beat-description"
+              placeholder="What happens in this beat?"
+            >${escapeHtml(beat.description)}</textarea>
+          </div>
+
+          <button class="icon-btn delete-beat" title="Delete beat">×</button>
+        `;
+
+        item.querySelector(".beat-title").addEventListener("input", event => {
+          project.beats[index].title = event.target.value;
+          autoSave();
+        });
+
+        item.querySelector(".beat-description").addEventListener("input", event => {
+          project.beats[index].description = event.target.value;
+          autoSave();
+        });
+
+        item.querySelector(".delete-beat").addEventListener("click", () => {
+          project.beats.splice(index, 1);
+          autoSave();
+          renderBeats();
+        });
+
+        list.appendChild(item);
+      });
+    }
+
+    $("addBeatBtn").addEventListener("click", () => {
+      project.beats.push({
+        title: "New Beat",
+        description: ""
+      });
+
+      autoSave();
+      renderBeats();
+
+      const items = document.querySelectorAll(".beat-title");
+      const last = items[items.length - 1];
+
+      if (last) {
+        last.focus();
+        last.select();
+      }
+    });
+
+    /* =========================================================
+       CHARACTERS
+       ========================================================= */
+
+    function renderCharacters() {
+      const list = $("characterList");
+      const empty = $("characterEmpty");
+
+      list.innerHTML = "";
+
+      empty.style.display =
+        project.characters.length ? "none" : "block";
+
+      project.characters.forEach((character, index) => {
+        const card = document.createElement("div");
+        card.className = "character-card";
+
+        card.innerHTML = `
+          <div class="character-top">
+            <input
+              type="text"
+              class="character-name"
+              value="${escapeAttribute(character.name)}"
+              placeholder="Character name..."
+            />
+
+            <button class="icon-btn delete-character" title="Delete character">×</button>
+          </div>
+
+          <div class="character-fields">
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <input
+                type="text"
+                class="character-role"
+                value="${escapeAttribute(character.role)}"
+                placeholder="Protagonist, antagonist..."
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Age / Description</label>
+              <input
+                type="text"
+                class="character-age"
+                value="${escapeAttribute(character.age)}"
+                placeholder="Age, appearance, identity..."
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Want</label>
+              <textarea class="character-want" placeholder="What does this character want?">${escapeHtml(character.want)}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Need</label>
+              <textarea class="character-need" placeholder="What does this character truly need?">${escapeHtml(character.need)}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Conflict</label>
+              <textarea class="character-conflict" placeholder="What stands in the way?">${escapeHtml(character.conflict)}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Arc</label>
+              <textarea class="character-arc" placeholder="How does this character change?">${escapeHtml(character.arc)}</textarea>
+            </div>
+          </div>
+        `;
+
+        const fields = {
+          name: ".character-name",
+          role: ".character-role",
+          age: ".character-age",
+          want: ".character-want",
+          need: ".character-need",
+          conflict: ".character-conflict",
+          arc: ".character-arc"
+        };
+
+        Object.entries(fields).forEach(([key, selector]) => {
+          card.querySelector(selector).addEventListener("input", event => {
+            project.characters[index][key] = event.target.value;
+            autoSave();
+          });
+        });
+
+        card.querySelector(".delete-character").addEventListener("click", () => {
+          project.characters.splice(index, 1);
+          autoSave();
+          renderCharacters();
+        });
+
+        list.appendChild(card);
+      });
+    }
+
+    $("addCharacterBtn").addEventListener("click", () => {
+      project.characters.push({
+        name: "New Character",
+        role: "",
+        age: "",
+        want: "",
+        need: "",
+        conflict: "",
+        arc: ""
+      });
+
+      autoSave();
+      renderCharacters();
+
+      const names = document.querySelectorAll(".character-name");
+      const last = names[names.length - 1];
+
+      if (last) {
+        last.focus();
+        last.select();
+      }
+    });
+
+    /* =========================================================
+       SCREENPLAY EDITOR
+       ========================================================= */
+
+    function updateScriptStats() {
+      const text = project.screenplay.trim();
+
+      const words = text
+        ? text.split(/\s+/).length
+        : 0;
+
+      const characters = project.screenplay.length;
+
+      $("scriptStats").textContent =
+        `${words} words · ${characters} characters`;
+
+      $("dashWordCount").textContent = words;
+    }
+
+    $("screenplayEditor").addEventListener("input", event => {
+      project.screenplay = event.target.value;
+      updateScriptStats();
+      autoSave();
+    });
+
+    document.querySelectorAll("[data-insert]").forEach(button => {
+      button.addEventListener("click", () => {
+        const editor = $("screenplayEditor");
+        const insertText = button.dataset.insert;
+
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+
+        const before = editor.value.substring(0, start);
+        const after = editor.value.substring(end);
+
+        const needsNewline =
+          before.length > 0 && !before.endsWith("\n");
+
+        editor.value =
+          before +
+          (needsNewline ? "\n\n" : "") +
+          insertText +
+          "\n\n" +
+          after;
+
+        project.screenplay = editor.value;
+        autoSave();
+        updateScriptStats();
+
+        editor.focus();
+
+        const newPosition =
+          start +
+          (needsNewline ? 2 : 0) +
+          insertText.length +
+          2;
+
+        editor.setSelectionRange(newPosition, newPosition);
+      });
+    });
+
+    /* =========================================================
+       DASHBOARD
+       ========================================================= */
+
+    function updateDashboard() {
+      const title = project.title || "Untitled";
+
+      $("dashProjectTitle").textContent = title;
+      $("dashBeatCount").textContent = project.beats.length;
+      $("projectCardTitle").textContent =
+        project.title || "Untitled Screenplay";
+
+      $("projectCardLogline").textContent =
+        project.logline || "Your next story begins here.";
+
+      $("projectCardGenre").textContent =
+        project.genre || "Genre not set";
+
+      $("projectCardStatus").textContent =
+        project.status || "In Development";
+    }
+
+    /* =========================================================
+       EXPORT
+       ========================================================= */
+
+    function exportProject() {
+      readProjectForm();
+      readBibleForm();
+
+      const lines = [];
+
+      lines.push("SCREEN FORGE PROJECT EXPORT");
+      lines.push("===========================");
+      lines.push("");
+
+      lines.push("PROJECT");
+      lines.push("-------");
+      lines.push(`Title: ${project.title || "Untitled"}`);
+      lines.push(`Genre: ${project.genre || "Not set"}`);
+      lines.push(`Format: ${project.format}`);
+      lines.push(`Status: ${project.status}`);
+      lines.push("");
+      lines.push("LOGLINE");
+      lines.push(project.logline || "");
+      lines.push("");
+      lines.push("PROJECT NOTES");
+      lines.push(project.notes || "");
+      lines.push("");
+
+      lines.push("STORY BIBLE");
+      lines.push("-----------");
+      lines.push("");
+      lines.push("CORE PREMISE");
+      lines.push(project.bible.premise || "");
+      lines.push("");
+      lines.push("THEMES");
+      lines.push(project.bible.themes || "");
+      lines.push("");
+      lines.push("WORLD & SETTING");
+      lines.push(project.bible.world || "");
+      lines.push("");
+      lines.push("CENTRAL CONFLICT");
+      lines.push(project.bible.conflict || "");
+      lines.push("");
+      lines.push("STAKES");
+      lines.push(project.bible.stakes || "");
+      lines.push("");
+      lines.push("STRUCTURE NOTES");
+      lines.push(project.bible.structure || "");
+      lines.push("");
+
+      lines.push("BEAT SHEET");
+      lines.push("----------");
+
+      project.beats.forEach((beat, index) => {
+        lines.push("");
+        lines.push(`${index + 1}. ${beat.title}`);
+        lines.push(beat.description || "");
+      });
+
+      lines.push("");
+      lines.push("CHARACTERS");
+      lines.push("----------");
+
+      project.characters.forEach(character => {
+        lines.push("");
+        lines.push(character.name || "Unnamed Character");
+        lines.push(`Role: ${character.role || ""}`);
+        lines.push(`Age / Description: ${character.age || ""}`);
+        lines.push(`Want: ${character.want || ""}`);
+        lines.push(`Need: ${character.need || ""}`);
+        lines.push(`Conflict: ${character.conflict || ""}`);
+        lines.push(`Arc: ${character.arc || ""}`);
+      });
+
+      lines.push("");
+      lines.push("SCREENPLAY");
+      lines.push("----------");
+      lines.push(project.screenplay || "");
+
+      const blob = new Blob([lines.join("\n")], {
+        type: "text/plain;charset=utf-8"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      const safeTitle =
+        (project.title || "screen-forge-project")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+
+      link.href = url;
+      link.download = `${safeTitle || "screen-forge-project"}.txt`;
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    $("exportBtn").addEventListener("click", exportProject);
+
+    $("saveBtn").addEventListener("click", () => {
+      readProjectForm();
+      readBibleForm();
+      autoSave();
+      alert("Screen Forge project saved.");
+    });
+
+    /* =========================================================
+       UTILITIES
+       ========================================================= */
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function escapeAttribute(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    /* =========================================================
+       INITIALIZE
+       ========================================================= */
+
+    function initialize() {
+      populateProjectForm();
+      populateBibleForm();
+      renderBeats();
+      renderCharacters();
+
+      $("screenplayEditor").value = project.screenplay;
+
+      updateScriptStats();
+      updateDashboard();
+    }
+
+    initialize();
+  </script>
 </body>
 </html>
- 
